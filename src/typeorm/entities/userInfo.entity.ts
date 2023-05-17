@@ -21,9 +21,18 @@ export class UserInfoEntity {
   @Column()
   dob: string;
 
+  @Column()
+  gender: boolean;
+
+  @Column()
+  addressDistrict: boolean;
+
+  @Column()
+  addressWard: boolean;
+
   @OneToOne(() => UserEntity)
   @JoinColumn()
-  userId: UserEntity;
+  user: UserEntity;
 
   @Column()
   createdAt: Date;

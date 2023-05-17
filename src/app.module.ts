@@ -1,14 +1,13 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { usersModule } from './user/users.module';
-import { productsModule } from './product/products.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { UsersController } from './user/users.controller';
-import { ProductsController } from './product/products.controller';
-import { UserEntity } from './typeorm/entities/user.entity';
-import { UserInfoEntity } from './typeorm/entities/userInfo.entity';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './common/guard/roles.guard';
 
 @Module({
   imports: [
@@ -16,25 +15,28 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
     }),
     usersModule,
-    productsModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
+      host: process.env.DATABASE_HOST,
+      port: parseInt(process.env.DATABASE_PORT),
+      username: process.env.DATABASE_USERNAME,
+      password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_TABLE,
-      entities: [UserEntity, UserInfoEntity],
+      entities: [__dirname + '/typeorm/entities/*.entity{.ts,.js}'],
       synchronize: false,
       logging: true,
     }),
     AuthModule,
   ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware)
-      .forRoutes(UsersController, ProductsController);
+    consumer.apply(LoggerMiddleware, AuthMiddleware).forRoutes(UsersController);
   }
 }
