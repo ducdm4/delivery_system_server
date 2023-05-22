@@ -6,10 +6,10 @@ export const dataSource = new DataSource({
   port: 3306,
   username: 'root',
   password: '',
-  database: 'learn_nest_1',
+  database: 'delivery_system',
   entities: [__dirname + '/../**/*/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/src/database/migrations/*{.ts,.js}'],
-  migrationsRun: false,
+  migrations: [__dirname + '/../**/*/migrations/*{.ts,.js}'],
+  migrationsRun: true,
   synchronize: false,
 });
 

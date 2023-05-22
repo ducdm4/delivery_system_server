@@ -7,39 +7,34 @@ import {
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { PhotoEntity } from './photo.entity';
-import { AddressEntity } from './address.entity';
+import { StationEntity } from './station.entity';
 
-@Entity({ name: 'user_info' })
-export class UserInfoEntity {
+@Entity({ name: 'employee_info' })
+export class EmployeeInfoEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  firstName: string;
+  @Column({ default: false })
+  isVerified: boolean;
 
-  @Column()
-  lastName: string;
-
-  @Column()
-  dob: string;
-
-  @Column()
-  gender: boolean;
-
-  @Column({ nullable: true })
-  phone: string;
+  @Column({ default: false })
+  isActive: boolean;
 
   @OneToOne(() => PhotoEntity)
   @JoinColumn()
-  profilePicture: PhotoEntity;
+  identityCardImage1: PhotoEntity;
+
+  @OneToOne(() => PhotoEntity)
+  @JoinColumn()
+  identityCardImage2: PhotoEntity;
 
   @OneToOne(() => UserEntity)
   @JoinColumn()
   user: UserEntity;
 
-  @OneToOne(() => AddressEntity)
+  @OneToOne(() => StationEntity)
   @JoinColumn()
-  address: AddressEntity;
+  station: StationEntity;
 
   @Column()
   createdAt: Date;

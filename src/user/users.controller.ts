@@ -1,15 +1,15 @@
 import {
+  Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
-  Post,
-  Body,
-  Res,
   HttpStatus,
-  Put,
   Param,
   ParseIntPipe,
+  Post,
+  Put,
+  Res,
   UseGuards,
-  ClassSerializerInterceptor,
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,13 +19,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersPipe } from './pipes/users.pipe';
 import { Roles } from '../common/decorator/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { ROLE_LIST } from '../common/constant';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
-  @Roles(['admin', 'operator'])
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   @Get()
   findAll() {
     return this.userService.getUser();
