@@ -8,14 +8,15 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Req,
   Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { Response } from 'express';
+import { CreateUserDto } from './dto/user.dto';
+import { Response, Request } from 'express';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto } from './dto/user.dto';
 import { UsersPipe } from './pipes/users.pipe';
 import { Roles } from '../common/decorator/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
@@ -32,10 +33,25 @@ export class UsersController {
     return this.userService.getUser();
   }
 
-  @Get(':id')
+  @Roles([ROLE_LIST.ADMIN])
+  @Get('detail/:id')
   @UseGuards(AuthGuard('jwt'))
   findUserById(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findUserById(id);
+  }
+
+  @Get('self')
+  @UseGuards(AuthGuard('jwt'))
+  async getLoggedInUser(@Req() req: Request, @Res() res: Response) {
+    const user = req.user;
+    console.log('ducdm req', req);
+    const userInfo = await this.userService.findSelfUser(user);
+    res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        userInfo,
+      },
+    });
   }
 
   @Post()

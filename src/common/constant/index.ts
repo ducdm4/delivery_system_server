@@ -1,9 +1,9 @@
 export enum ROLE_LIST {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  COLLECTOR = 'collector',
-  SHIPPER = 'shipper',
-  CUSTOMER = 'customer',
+  ADMIN = 1,
+  OPERATOR = 2,
+  COLLECTOR = 3,
+  SHIPPER = 4,
+  CUSTOMER = 5,
 }
 
 export enum STATION_TYPE {

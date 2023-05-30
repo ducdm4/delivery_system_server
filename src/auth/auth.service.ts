@@ -22,7 +22,7 @@ export class AuthService {
   ) {}
 
   async signIn(loginInfo: SignInDto) {
-    const { email, password } = loginInfo;
+    const { email, password, role } = loginInfo;
     const user = await this.userRepository.findOneBy({
       email,
     });
@@ -30,13 +30,19 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
     const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) {
+    console.log('ducm1', user.role);
+    console.log('ducm2', loginInfo);
+    if (isMatch && user.role === loginInfo.role) {
       delete user.password;
+      delete user.refreshToken;
       const tokens = await this.getTokens(user);
       await this.updateRefreshToken(user.id, tokens.refreshToken);
-      return tokens;
+      return {
+        tokens,
+        user,
+      };
     } else {
-      throw new NotFoundException('Wrong password');
+      throw new NotFoundException('Incorrect login info');
     }
   }
 

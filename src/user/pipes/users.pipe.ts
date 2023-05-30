@@ -4,12 +4,11 @@ import {
   ArgumentMetadata,
   BadRequestException,
 } from '@nestjs/common';
-import { IsEmail } from 'class-validator';
 
 @Injectable()
 export class UsersPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata): any {
-    const { email, password } = value;
+    const { password } = value;
     this.validPassword(password);
     return value;
   }

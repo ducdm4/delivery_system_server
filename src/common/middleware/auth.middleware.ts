@@ -1,12 +1,8 @@
 import { ForbiddenException, Injectable, NestMiddleware } from '@nestjs/common';
 import { UsersService } from '../../user/users.service';
 import { Request, Response } from 'express';
-import { verify, JwtPayload } from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 
-interface AccessTokenPayload {
-  userId: number;
-  role: number;
-}
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   constructor(private readonly userService: UsersService) {}

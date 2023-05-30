@@ -1,7 +1,6 @@
 import { CanActivate, Injectable, ExecutionContext } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
-import { ROLE_LIST } from 'src/common/constant';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -21,6 +20,6 @@ export class RolesGuard implements CanActivate {
     if (roles.length && !user) {
       return false;
     }
-    return roles.indexOf(ROLE_LIST[user.role]) > -1;
+    return roles.indexOf(user.role) > -1;
   }
 }

@@ -1,9 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../typeorm/entities/user.entity';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto, CreateUserDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -52,5 +50,14 @@ export class UsersService {
 
   updateUser(id: number, updateUserDetails: UpdateUserDto) {
     return this.userRepository.update({ id }, { ...updateUserDetails });
+  }
+
+  async findSelfUser(user: Express.User) {
+    const userLoggedInfo = await this.userRepository.findOne({
+      where: {
+        email: user['email'],
+      },
+    });
+    return userLoggedInfo;
   }
 }
