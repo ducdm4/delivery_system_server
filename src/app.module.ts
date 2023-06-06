@@ -1,8 +1,10 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { usersModule } from './user/users.module';
+import { UsersModule } from './user/users.module';
+import { CitiesModule } from './city/cities.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { UsersController } from './user/users.controller';
+import { CitiesController } from './city/cities.controller';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
@@ -15,8 +17,9 @@ import { DatabaseModule } from './database/database.module';
       isGlobal: true,
     }),
     DatabaseModule,
-    usersModule,
+    UsersModule,
     AuthModule,
+    CitiesModule,
   ],
   providers: [
     {
@@ -27,6 +30,8 @@ import { DatabaseModule } from './database/database.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware, AuthMiddleware).forRoutes(UsersController);
+    consumer
+      .apply(LoggerMiddleware, AuthMiddleware)
+      .forRoutes(UsersController, CitiesController);
   }
 }

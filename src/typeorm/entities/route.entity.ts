@@ -1,11 +1,14 @@
 import {
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
   ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { EmployeeInfoEntity } from './employeeInfo.entity';
 import { WardEntity } from './ward.entity';
@@ -29,9 +32,12 @@ export class RouteEntity {
   @JoinTable()
   wards: WardEntity[];
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn({ nullable: true, default: null })
+  deletedAt: Date;
 }

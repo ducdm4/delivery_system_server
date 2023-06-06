@@ -1,9 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { DistrictEntity } from './district.entity';
 
@@ -22,6 +25,12 @@ export class WardEntity {
   @JoinColumn()
   district: DistrictEntity;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn({ nullable: true, default: null })
+  deletedAt: Date;
 }

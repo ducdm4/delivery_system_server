@@ -5,7 +5,6 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategy/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { RefreshStrategy } from './strategy/refresh.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { UsersService } from '../user/users.service';
 import { DatabaseModule } from '../database/database.module';
@@ -27,7 +26,6 @@ import { UserProviders } from '../typeorm/providers/user.providers';
     UsersService,
     LocalStrategy,
     JwtStrategy,
-    RefreshStrategy,
   ],
 })
 export class AuthModule {}

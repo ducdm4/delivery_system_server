@@ -14,7 +14,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(data) {
-    console.log('ducdm', data.user);
     return data.user as UserInfo;
   }
 }

@@ -23,20 +23,22 @@ export class AuthService {
 
   async signIn(loginInfo: SignInDto) {
     const { email, password, role } = loginInfo;
-    const user = await this.userRepository.findOneBy({
-      email,
+    const user = await this.userRepository.findOne({
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        role: true,
+      },
+      where: { email },
     });
     if (!user) {
       throw new NotFoundException('User not found');
     }
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log('ducm1', user.role);
-    console.log('ducm2', loginInfo);
-    if (isMatch && user.role === loginInfo.role) {
+    if (isMatch && user.role === role) {
       delete user.password;
-      delete user.refreshToken;
       const tokens = await this.getTokens(user);
-      await this.updateRefreshToken(user.id, tokens.refreshToken);
       return {
         tokens,
         user,
@@ -47,49 +49,18 @@ export class AuthService {
   }
 
   async getTokens(user: Express.User) {
-    const [accessToken, refreshToken] = await Promise.all([
+    const [accessToken] = await Promise.all([
       this.jwtService.signAsync(
         { user },
         {
           secret: process.env.JWT_SECRET,
-          expiresIn: '1h',
-        },
-      ),
-      this.jwtService.signAsync(
-        { user },
-        {
-          secret: process.env.REFRESH_SECRET,
-          expiresIn: '7d',
+          expiresIn: '6h',
         },
       ),
     ]);
 
     return {
       accessToken,
-      refreshToken,
     };
-  }
-
-  async updateRefreshToken(userId: number, refreshToken: string) {
-    const salt = await bcrypt.genSalt();
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, salt);
-    await this.userRepository.update(
-      { id: userId },
-      { ...{ refreshToken: hashedRefreshToken } },
-    );
-  }
-
-  async refreshTokens(userId: number, refreshToken: string) {
-    const user = await this.usersService.findUserById(userId);
-    if (!user || !user.refreshToken)
-      throw new ForbiddenException('Access Denied');
-    const refreshTokenMatches = await bcrypt.compare(
-      refreshToken,
-      user.refreshToken,
-    );
-    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-    const tokens = await this.getTokens(user);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
-    return tokens;
   }
 }

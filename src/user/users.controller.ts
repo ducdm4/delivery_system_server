@@ -44,7 +44,6 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   async getLoggedInUser(@Req() req: Request, @Res() res: Response) {
     const user = req.user;
-    console.log('ducdm req', req);
     const userInfo = await this.userService.findSelfUser(user);
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
@@ -55,6 +54,7 @@ export class UsersController {
   }
 
   @Post()
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   async create(
     @Body('', UsersPipe) createUserDto: CreateUserDto,
     @Res() res: Response,
@@ -64,6 +64,7 @@ export class UsersController {
   }
 
   @Put(':id')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   updateUserById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,

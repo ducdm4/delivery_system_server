@@ -1,9 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { PhotoEntity } from './photo.entity';
@@ -20,10 +23,6 @@ export class UserEntity {
   @Column({ select: false })
   @Exclude()
   password: string;
-
-  @Exclude()
-  @Column({ nullable: true, select: false })
-  refreshToken: string;
 
   @Column({ default: 1 })
   role: number;
@@ -51,9 +50,12 @@ export class UserEntity {
   @JoinColumn()
   address: AddressEntity;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn({ nullable: true, default: null })
+  deletedAt: Date;
 }

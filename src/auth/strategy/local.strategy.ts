@@ -17,7 +17,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   validate(req: Request) {
     const tokens = this.authService.signIn(req.body);
     if (!tokens) {
-      throw new UnauthorizedException('signin failed');
+      throw new UnauthorizedException('sign in failed');
     }
     return tokens;
   }

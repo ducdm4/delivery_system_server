@@ -48,12 +48,16 @@ export class UsersService {
     return newUser.id;
   }
 
-  updateUser(id: number, updateUserDetails: UpdateUserDto) {
-    return this.userRepository.update({ id }, { ...updateUserDetails });
+  async updateUser(id: number, updateUserDetails: UpdateUserDto) {
+    return await this.userRepository.update({ id }, { ...updateUserDetails });
   }
 
   async findSelfUser(user: Express.User) {
     const userLoggedInfo = await this.userRepository.findOne({
+      relations: {
+        profilePicture: true,
+        address: true,
+      },
       where: {
         email: user['email'],
       },

@@ -10,4 +10,4 @@ import { UserProviders } from '../typeorm/providers/user.providers';
   providers: [...UserProviders, UsersService],
   exports: [UsersService],
 })
-export class usersModule {}
+export class UsersModule {}
