@@ -53,6 +53,6 @@ export class OrderTrackingEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn({ nullable: true, default: null })
+  @DeleteDateColumn({ nullable: true, default: null, select: false })
   deletedAt: Date;
 }

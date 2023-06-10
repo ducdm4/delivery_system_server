@@ -27,16 +27,16 @@ export class UserEntity {
   @Column({ default: 1 })
   role: number;
 
-  @Column()
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastName: string;
 
-  @Column()
+  @Column({ nullable: true })
   dob: string;
 
-  @Column()
+  @Column({ default: true })
   gender: boolean;
 
   @Column({ nullable: true })
@@ -56,6 +56,6 @@ export class UserEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn({ nullable: true, default: null })
+  @DeleteDateColumn({ nullable: true, default: null, select: false })
   deletedAt: Date;
 }

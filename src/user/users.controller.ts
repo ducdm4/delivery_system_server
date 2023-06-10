@@ -54,7 +54,7 @@ export class UsersController {
   }
 
   @Post()
-  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  // @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   async create(
     @Body('', UsersPipe) createUserDto: CreateUserDto,
     @Res() res: Response,

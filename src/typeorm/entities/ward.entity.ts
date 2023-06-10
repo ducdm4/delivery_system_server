@@ -4,6 +4,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -21,7 +22,7 @@ export class WardEntity {
   @Column()
   slug: string;
 
-  @OneToOne(() => DistrictEntity)
+  @ManyToOne(() => DistrictEntity)
   @JoinColumn()
   district: DistrictEntity;
 
@@ -31,6 +32,6 @@ export class WardEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn({ nullable: true, default: null })
+  @DeleteDateColumn({ nullable: true, default: null, select: false })
   deletedAt: Date;
 }

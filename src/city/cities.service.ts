@@ -17,6 +17,18 @@ export class CitiesService {
   ) {}
 
   async getListCity(filter) {
+    if (!filter) {
+      const cityList = await this.cityRepository.find();
+      const cities = cityList.map((item) => {
+        return {
+          id: item.id,
+          name: item.name,
+        };
+      });
+      return {
+        list: cities,
+      };
+    }
     const cityQuery = this.cityRepository.createQueryBuilder();
     if (filter.keyword) {
       cityQuery.where('name LIKE :keyword', { keyword: `%${filter.keyword}%` });
@@ -26,8 +38,18 @@ export class CitiesService {
         cityQuery.orderBy(sortItem.key, sortItem.value.toUpperCase());
       });
     }
-    console.log('ducdmmm', await cityQuery.getMany());
-    return await cityQuery.getMany();
+    const totalCity = await cityQuery.getCount();
+    if (filter.page) {
+      cityQuery.offset((filter.page - 1) * filter.limit);
+      cityQuery.limit(filter.limit);
+    }
+    console.log('filter', filter);
+    const cityList = await cityQuery.getMany();
+    return {
+      page: filter.page,
+      total: totalCity,
+      list: cityList,
+    };
   }
 
   async getCityById(id: number) {

@@ -4,11 +4,12 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { CityEntity } from './city.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'districts' })
 export class DistrictEntity {
@@ -21,8 +22,8 @@ export class DistrictEntity {
   @Column()
   slug: string;
 
-  @OneToOne(() => CityEntity)
-  @JoinColumn()
+  @ManyToOne(() => CityEntity)
+  @JoinColumn({ name: 'cityId', referencedColumnName: 'id' })
   city: CityEntity;
 
   @CreateDateColumn()
@@ -31,6 +32,7 @@ export class DistrictEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn({ nullable: true, default: null })
+  @DeleteDateColumn({ nullable: true, default: null, select: false })
+  @Exclude()
   deletedAt: Date;
 }

@@ -13,26 +13,25 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { CitiesService } from './cities.service';
+import { DistrictsService } from './districts.service';
 import { ROLE_LIST } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
-import { UpdateCityDto } from './dto/updateCity.dto';
+import { UpdateDistrictDto } from './dto/updateDistrict.dto';
 import { SearchInterface } from '../common/interface/search.interface';
 import { encode } from 'html-entities';
-import { CreateCityDto } from './dto/createCity.dto';
+import { CreateDistrictDto } from './dto/createDistrict.dto';
 
-@Controller('cities')
-export class CitiesController {
-  constructor(private readonly cityService: CitiesService) {}
+@Controller('districts')
+export class DistrictsController {
+  constructor(private readonly districtService: DistrictsService) {}
 
   @Get()
   @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
-    console.log('req.query', req.query);
-    let citiList = null;
     const filterObject: SearchInterface = {
       keyword: '',
       sort: [],
+      filter: [],
       page: 0,
       limit: 10,
     };
@@ -47,17 +46,21 @@ export class CitiesController {
         });
       }
     }
+    if (typeof req.query['filter'] === 'object') {
+      for (const [key, value] of Object.entries(req.query['filter'])) {
+        filterObject.filter.push({
+          key,
+          value: value as string,
+        });
+      }
+    }
     if (typeof req.query['page'] === 'string') {
       filterObject.page = parseInt(req.query['page']);
     }
     if (typeof req.query['limit'] === 'string') {
       filterObject.limit = parseInt(req.query['limit']);
     }
-    if (Object.entries(req.query).length === 0) {
-      citiList = this.cityService.getListCity('');
-    } else {
-      citiList = this.cityService.getListCity(filterObject);
-    }
+    const citiList = this.districtService.getListDistrict(filterObject);
     citiList.then((citiesInfo) => {
       res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
@@ -69,18 +72,18 @@ export class CitiesController {
   @Get(':id')
   @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   findOne(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
-    const cityInfo = this.cityService.getCityById(id);
-    cityInfo.then(
-      (city) => {
+    const districtInfo = this.districtService.getDistrictById(id);
+    districtInfo.then(
+      (district) => {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
-          data: { city },
+          data: { district },
         });
       },
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'City not found',
+          message: 'District not found',
           data: {},
         });
       },
@@ -89,31 +92,34 @@ export class CitiesController {
 
   @Post()
   @Roles([ROLE_LIST.ADMIN])
-  createNewCity(
-    @Body() createCityDto: CreateCityDto,
+  createNewDistrict(
+    @Body() createDistrictDto: CreateDistrictDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const response = this.cityService.createCity(createCityDto);
-    response.then((cityData) => {
+    const response = this.districtService.createDistrict(createDistrictDto);
+    response.then((districtData) => {
       res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
-        data: { cityInfo: cityData },
+        data: { districtInfo: districtData },
       });
     });
   }
 
   @Put(':id')
   @Roles([ROLE_LIST.ADMIN])
-  editCityInfo(
+  editDistrictInfo(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateCityData: UpdateCityDto,
+    @Body() updateDistrictData: UpdateDistrictDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const response = this.cityService.updateCityInfo(updateCityData, id);
+    const response = this.districtService.updateDistrictInfo(
+      updateDistrictData,
+      id,
+    );
     response.then(
-      (cityData) => {
+      (districtData) => {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
           data: {},
@@ -122,7 +128,7 @@ export class CitiesController {
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'City not found',
+          message: 'District not found',
           data: {},
         });
       },
@@ -131,8 +137,11 @@ export class CitiesController {
 
   @Delete(':id')
   @Roles([ROLE_LIST.ADMIN])
-  deleteCityInfo(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
-    const response = this.cityService.deleteCity(id);
+  deleteDistrictInfo(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const response = this.districtService.deleteDistrict(id);
     response.then(
       (data) => {
         res.status(HttpStatus.OK).json({
@@ -143,7 +152,7 @@ export class CitiesController {
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'City not found',
+          message: 'District not found',
           data: {},
         });
       },
