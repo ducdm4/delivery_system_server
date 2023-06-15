@@ -12,32 +12,6 @@ export class DistrictsService {
   ) {}
 
   async getListDistrict(filter) {
-    // const selectOption: { [key: string]: any } = {
-    //   relations: {
-    //     city: true,
-    //   },
-    //   where: {
-    //     name: Like(`%${filter.keyword}%`),
-    //   },
-    // };
-    // const orderObject: { [key: string]: string | object } = {};
-    // if (filter.sort.length) {
-    //   filter.sort.forEach((sortItem) => {
-    //     if (sortItem.key === 'city') {
-    //       orderObject[sortItem.key] = {
-    //         name: sortItem.value.toUpperCase(),
-    //       };
-    //     }
-    //     orderObject[sortItem.key] = sortItem.value.toUpperCase();
-    //   });
-    //   selectOption.order = orderObject;
-    // }
-    // const totalDistrict = await this.districtRepository.count(selectOption);
-    // if (filter.page) {
-    //   selectOption.skip = (filter.page - 1) * filter.limit;
-    //   selectOption.take = filter.limit;
-    // }
-    // const districtList = await this.districtRepository.find(selectOption);
     const districtQuery =
       this.districtRepository.createQueryBuilder('district');
     districtQuery.innerJoin('cities', 'city', 'district.cityId = city.id');
@@ -53,7 +27,7 @@ export class DistrictsService {
     }
     if (filter.filter.length) {
       filter.filter.forEach((filterItem) => {
-        districtQuery.where('city.id = :id', { id: filterItem.value });
+        districtQuery.andWhere('city.id = :id', { id: filterItem.value });
       });
     }
     if (filter.sort.length) {
@@ -73,7 +47,6 @@ export class DistrictsService {
       districtQuery.offset((filter.page - 1) * filter.limit);
       districtQuery.limit(filter.limit);
     }
-    console.log('districtQuery', districtQuery.getSql());
     const districtList = await districtQuery.getRawMany();
     return {
       page: filter.page,
@@ -126,7 +99,6 @@ export class DistrictsService {
           },
         },
       );
-      console.log('ducdm', result);
       return result;
     }
   }
@@ -135,7 +107,6 @@ export class DistrictsService {
     const checkDistrict = await this.getDistrictById(id);
     if (checkDistrict) {
       const result = await this.districtRepository.softDelete(id);
-      console.log('ducdm', result);
       return result;
     }
   }

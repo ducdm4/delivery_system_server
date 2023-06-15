@@ -23,7 +23,7 @@ export class WardEntity {
   slug: string;
 
   @ManyToOne(() => DistrictEntity)
-  @JoinColumn()
+  @JoinColumn({ name: 'districtId', referencedColumnName: 'id' })
   district: DistrictEntity;
 
   @CreateDateColumn()

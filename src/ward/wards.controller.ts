@@ -13,17 +13,17 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DistrictsService } from './districts.service';
+import { WardsService } from './wards.service';
 import { ROLE_LIST } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
-import { UpdateDistrictDto } from './dto/updateDistrict.dto';
+import { UpdateWardDto } from './dto/updateWard.dto';
 import { SearchInterface } from '../common/interface/search.interface';
 import { encode } from 'html-entities';
-import { CreateDistrictDto } from './dto/createDistrict.dto';
+import { CreateWardDto } from './dto/createWard.dto';
 
-@Controller('districts')
-export class DistrictsController {
-  constructor(private readonly districtService: DistrictsService) {}
+@Controller('wards')
+export class WardsController {
+  constructor(private readonly wardService: WardsService) {}
 
   @Get()
   @Roles([ROLE_LIST.ADMIN])
@@ -60,11 +60,11 @@ export class DistrictsController {
     if (typeof req.query['limit'] === 'string') {
       filterObject.limit = parseInt(req.query['limit']);
     }
-    const districtList = this.districtService.getListDistrict(filterObject);
-    districtList.then((districtsInfo) => {
+    const wardList = this.wardService.getListWard(filterObject);
+    wardList.then((wardsInfo) => {
       res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
-        data: districtsInfo,
+        data: wardsInfo,
       });
     });
   }
@@ -72,18 +72,18 @@ export class DistrictsController {
   @Get(':id')
   @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   findOne(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
-    const districtInfo = this.districtService.getDistrictById(id);
-    districtInfo.then(
-      (district) => {
+    const wardInfo = this.wardService.getWardById(id);
+    wardInfo.then(
+      (ward) => {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
-          data: { district },
+          data: { ward },
         });
       },
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'District not found',
+          message: 'Ward not found',
           data: {},
         });
       },
@@ -92,32 +92,29 @@ export class DistrictsController {
 
   @Post()
   @Roles([ROLE_LIST.ADMIN])
-  createNewDistrict(
-    @Body() createDistrictDto: CreateDistrictDto,
+  createNewWard(
+    @Body() createWardDto: CreateWardDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const response = this.districtService.createDistrict(createDistrictDto);
-    response.then((districtData) => {
+    const response = this.wardService.createWard(createWardDto);
+    response.then((wardData) => {
       res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
-        data: { districtInfo: districtData },
+        data: { wardInfo: wardData },
       });
     });
   }
 
   @Put(':id')
   @Roles([ROLE_LIST.ADMIN])
-  editDistrictInfo(
+  editWardInfo(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateDistrictData: UpdateDistrictDto,
+    @Body() updateWardData: UpdateWardDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const response = this.districtService.updateDistrictInfo(
-      updateDistrictData,
-      id,
-    );
+    const response = this.wardService.updateWardInfo(updateWardData, id);
     response.then(
       (districtData) => {
         res.status(HttpStatus.OK).json({
@@ -128,7 +125,7 @@ export class DistrictsController {
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'District not found',
+          message: 'Ward not found',
           data: {},
         });
       },
@@ -137,11 +134,8 @@ export class DistrictsController {
 
   @Delete(':id')
   @Roles([ROLE_LIST.ADMIN])
-  deleteDistrictInfo(
-    @Param('id', ParseIntPipe) id: number,
-    @Res() res: Response,
-  ) {
-    const response = this.districtService.deleteDistrict(id);
+  deleteWardInfo(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    const response = this.wardService.deleteWard(id);
     response.then(
       (data) => {
         res.status(HttpStatus.OK).json({
@@ -152,7 +146,7 @@ export class DistrictsController {
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'District not found',
+          message: 'Ward not found',
           data: {},
         });
       },

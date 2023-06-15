@@ -43,7 +43,6 @@ export class CitiesService {
       cityQuery.offset((filter.page - 1) * filter.limit);
       cityQuery.limit(filter.limit);
     }
-    console.log('filter', filter);
     const cityList = await cityQuery.getMany();
     return {
       page: filter.page,
@@ -78,7 +77,6 @@ export class CitiesService {
     const checkCity = await this.getCityById(id);
     if (checkCity) {
       const result = await this.cityRepository.update({ id }, data);
-      console.log('ducdm', result);
       return result;
     }
   }
@@ -87,7 +85,6 @@ export class CitiesService {
     const checkCity = await this.getCityById(id);
     if (checkCity) {
       const result = await this.cityRepository.softDelete(id);
-      console.log('ducdm', result);
       return result;
     }
   }

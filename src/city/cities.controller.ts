@@ -28,7 +28,6 @@ export class CitiesController {
   @Get()
   @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
-    console.log('req.query', req.query);
     let citiList = null;
     const filterObject: SearchInterface = {
       keyword: '',
