@@ -3,29 +3,42 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CityEntity } from './city.entity';
+import { DistrictEntity } from './district.entity';
+import { WardEntity } from './ward.entity';
+import { StreetEntity } from './street.entity';
 
 @Entity({ name: 'addresses' })
 export class AddressEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: 1 })
-  cityId: number;
+  @ManyToOne(() => CityEntity)
+  @JoinColumn({ name: 'cityId', referencedColumnName: 'id' })
+  city: CityEntity;
 
-  @Column({ nullable: true })
-  districtId: number;
+  @ManyToOne(() => DistrictEntity)
+  @JoinColumn({ name: 'districtId', referencedColumnName: 'id' })
+  district: DistrictEntity;
 
-  @Column({ nullable: true })
-  wardId: number;
+  @ManyToOne(() => WardEntity)
+  @JoinColumn({ name: 'wardId', referencedColumnName: 'id' })
+  ward: WardEntity;
 
-  @Column({ nullable: true })
-  street: string;
+  @ManyToOne(() => StreetEntity)
+  @JoinColumn({ name: 'streetId', referencedColumnName: 'id' })
+  street: StreetEntity;
 
   @Column({ nullable: true })
   building: string;
+
+  @Column({ nullable: true })
+  detail: string;
 
   @CreateDateColumn()
   createdAt: Date;

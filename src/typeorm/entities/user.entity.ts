@@ -34,7 +34,7 @@ export class UserEntity {
   lastName: string;
 
   @Column({ nullable: true })
-  dob: string;
+  dob: Date;
 
   @Column({ default: true })
   gender: boolean;
@@ -43,11 +43,11 @@ export class UserEntity {
   phone: string;
 
   @OneToOne(() => PhotoEntity)
-  @JoinColumn()
+  @JoinColumn({ name: 'profilePictureId', referencedColumnName: 'id' })
   profilePicture: PhotoEntity;
 
   @OneToOne(() => AddressEntity)
-  @JoinColumn()
+  @JoinColumn({ name: 'addressId', referencedColumnName: 'id' })
   address: AddressEntity;
 
   @CreateDateColumn()

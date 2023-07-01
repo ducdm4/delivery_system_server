@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { EmployeeInfoEntity } from './employeeInfo.entity';
-import { WardEntity } from './ward.entity';
+import { StreetEntity } from './street.entity';
 
 @Entity({ name: 'routes' })
 export class RouteEntity {
@@ -28,9 +28,9 @@ export class RouteEntity {
   @Column({ nullable: true })
   isGoToParent: boolean;
 
-  @ManyToMany(() => WardEntity)
+  @ManyToMany(() => StreetEntity)
   @JoinTable()
-  wards: WardEntity[];
+  streets: StreetEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

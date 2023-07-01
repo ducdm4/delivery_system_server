@@ -3,12 +3,16 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { WardEntity } from './ward.entity';
 
-@Entity({ name: 'photos' })
-export class PhotoEntity {
+@Entity({ name: 'streets' })
+export class StreetEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -16,7 +20,11 @@ export class PhotoEntity {
   name: string;
 
   @Column()
-  mimeType: string;
+  slug: string;
+
+  @ManyToOne(() => WardEntity)
+  @JoinColumn({ name: 'wardId', referencedColumnName: 'id' })
+  ward: WardEntity;
 
   @CreateDateColumn()
   createdAt: Date;

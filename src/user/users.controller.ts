@@ -13,19 +13,28 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/user.dto';
+import {
+  CreateUserDto,
+  UpdateUserPayloadDto,
+  UpdateUserDto,
+  ChangePasswordDto,
+} from './dto/user.dto';
 import { Response, Request } from 'express';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/user.dto';
 import { UsersPipe } from './pipes/users.pipe';
 import { Roles } from '../common/decorator/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { ROLE_LIST } from '../common/constant';
+import { AddressesService } from '../address/addresses.service';
+import { CreateAddressDto } from '../address/dto/createAddress.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly addressService: AddressesService,
+  ) {}
 
   @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   @Get()
@@ -63,12 +72,57 @@ export class UsersController {
     res.status(HttpStatus.OK).json({ id: user });
   }
 
-  @Put(':id')
+  @Put('detail/:id')
   @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   updateUserById(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserPayloadDto: UpdateUserPayloadDto,
   ) {
-    this.userService.updateUser(id, updateUserDto);
+    // this.userService.updateUser(id, updateUserPayloadDto);
+  }
+
+  @Put('change-password')
+  @UseGuards(AuthGuard('jwt'))
+  async changePassword(
+    @Body() passwordInfo: ChangePasswordDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const user = req.user;
+    const response = await this.userService.updatePassword(passwordInfo, user);
+    res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        response,
+      },
+    });
+  }
+
+  @Put('self')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  async updateSelfInfo(
+    @Body() updateUserPayloadDto: UpdateUserPayloadDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    let addressInfo;
+    if (updateUserPayloadDto.addressId) {
+      addressInfo = await this.addressService.updateAddressInfo(
+        updateUserPayloadDto.address,
+        updateUserPayloadDto.addressId,
+      );
+    } else {
+      addressInfo = await this.addressService.createAddress(
+        updateUserPayloadDto.address,
+      );
+    }
+    const updateUserDto = updateUserPayloadDto;
+    updateUserDto.address = addressInfo.id;
+    const userInfo = await this.userService.updateSelfInfo(updateUserDto);
+    res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      data: {
+        userInfo,
+      },
+    });
   }
 }
