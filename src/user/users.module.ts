@@ -5,6 +5,7 @@ import { UsersController } from './users.controller';
 import { DatabaseModule } from '../database/database.module';
 import { UserProviders } from '../typeorm/providers/user.providers';
 import { AddressProviders } from '../typeorm/providers/address.providers';
+import { MailService } from '../mail/mail.service';
 
 @Module({
   imports: [DatabaseModule],
@@ -14,6 +15,7 @@ import { AddressProviders } from '../typeorm/providers/address.providers';
     ...AddressProviders,
     UsersService,
     AddressesService,
+    MailService,
   ],
   exports: [UsersService],
 })

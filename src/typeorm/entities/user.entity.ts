@@ -33,8 +33,8 @@ export class UserEntity {
   @Column({ nullable: true })
   lastName: string;
 
-  @Column({ nullable: true })
-  dob: Date;
+  @Column({ nullable: true, type: 'date' })
+  dob: string;
 
   @Column({ default: true })
   gender: boolean;

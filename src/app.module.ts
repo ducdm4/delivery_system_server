@@ -20,6 +20,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './common/guard/roles.guard';
 import { DatabaseModule } from './database/database.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { DatabaseModule } from './database/database.module';
     StreetsModule,
     PhotosModule,
     AddressesModule,
+    MailModule,
   ],
   providers: [
     {

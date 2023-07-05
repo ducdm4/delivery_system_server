@@ -15,21 +15,18 @@ export class StationEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: 1 })
+  @Column({ default: 0 })
   type: number;
 
   @Column()
   name: string;
 
   @OneToOne(() => AddressEntity)
-  @JoinColumn()
+  @JoinColumn({ name: 'addressId', referencedColumnName: 'id' })
   address: AddressEntity;
 
   @Column({ nullable: true })
   parentStation: number;
-
-  @Column({ nullable: true })
-  wardList: string;
 
   @Column({ default: true })
   isActive: boolean;

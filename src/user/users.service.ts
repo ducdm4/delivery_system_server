@@ -7,12 +7,14 @@ import {
   ChangePasswordDto,
 } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject('USER_REPOSITORY')
     private userRepository: Repository<UserEntity>,
+    private mailService: MailService,
   ) {}
   getUser() {
     return this.userRepository.find();
@@ -31,8 +33,13 @@ export class UsersService {
     }
   }
 
-  async addUser(user: CreateUserDto) {
-    const { email, password } = user;
+  async addUser(
+    user: CreateUserDto,
+    addressId,
+    password,
+    sendMailType: number, // 1: send mail notify password, 2: send mail verify user
+  ) {
+    const { email } = user;
     const existingUser = await this.userRepository.findOne({
       where: {
         email,
@@ -44,11 +51,19 @@ export class UsersService {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     const newUser = this.userRepository.create({
-      email,
+      ...user,
+      address: addressId,
       password: hashedPassword,
       createdAt: new Date(),
     });
     await this.userRepository.save(newUser);
+    if (sendMailType === 1) {
+      await this.mailService.sendEmailCreateAccount({
+        name: `${user.firstName} ${user.lastName}`,
+        mail: email,
+        password: password,
+      });
+    }
     return newUser.id;
   }
 
@@ -67,6 +82,8 @@ export class UsersService {
   async updatePassword(passwordInfo: ChangePasswordDto, user: Express.User) {
     const userInfo = await this.userRepository.findOne({
       select: {
+        firstName: true,
+        lastName: true,
         password: true,
       },
       where: {
@@ -89,6 +106,9 @@ export class UsersService {
         const result = await this.userRepository.update(
           { id: user['id'] },
           { password: hashedPassword },
+        );
+        await this.mailService.sendEmailChangePassword(
+          `${userInfo.firstName} ${userInfo.lastName}`,
         );
         return result;
       } else {

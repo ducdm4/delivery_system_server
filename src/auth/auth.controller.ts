@@ -3,7 +3,6 @@ import {
   Post,
   UseGuards,
   Req,
-  Get,
   Res,
   HttpStatus,
   Body,
@@ -14,9 +13,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { GetUser } from '../common/decorator/get-user.decorator';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
-import { UserEntity } from '../typeorm/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')

@@ -24,19 +24,19 @@ export class EmployeeInfoEntity {
   isActive: boolean;
 
   @OneToOne(() => PhotoEntity)
-  @JoinColumn()
+  @JoinColumn({ name: 'identityCardImage1Id', referencedColumnName: 'id' })
   identityCardImage1: PhotoEntity;
 
   @OneToOne(() => PhotoEntity)
-  @JoinColumn()
+  @JoinColumn({ name: 'identityCardImage2Id', referencedColumnName: 'id' })
   identityCardImage2: PhotoEntity;
 
   @OneToOne(() => UserEntity)
-  @JoinColumn()
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: UserEntity;
 
   @OneToOne(() => StationEntity)
-  @JoinColumn()
+  @JoinColumn({ name: 'stationId', referencedColumnName: 'id' })
   station: StationEntity;
 
   @CreateDateColumn()

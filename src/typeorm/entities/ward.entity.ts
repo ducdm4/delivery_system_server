@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { DistrictEntity } from './district.entity';
+import { StationEntity } from './station.entity';
 
 @Entity({ name: 'wards' })
 export class WardEntity {
@@ -25,6 +26,10 @@ export class WardEntity {
   @ManyToOne(() => DistrictEntity)
   @JoinColumn({ name: 'districtId', referencedColumnName: 'id' })
   district: DistrictEntity;
+
+  @ManyToOne(() => StationEntity)
+  @JoinColumn({ name: 'stationId', referencedColumnName: 'id' })
+  station: StationEntity;
 
   @CreateDateColumn()
   createdAt: Date;

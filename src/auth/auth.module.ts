@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { UsersService } from '../user/users.service';
+import { MailService } from '../mail/mail.service';
 import { DatabaseModule } from '../database/database.module';
 import { UserProviders } from '../typeorm/providers/user.providers';
 
@@ -26,6 +27,7 @@ import { UserProviders } from '../typeorm/providers/user.providers';
     UsersService,
     LocalStrategy,
     JwtStrategy,
+    MailService,
   ],
 })
 export class AuthModule {}

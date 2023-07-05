@@ -121,6 +121,21 @@ export class WardsService {
     }
   }
 
+  async updateWardStation(stationId: number, id: number) {
+    const checkWard = await this.getWardById(id);
+    if (checkWard) {
+      const result = await this.wardRepository.update(
+        { id },
+        {
+          station: {
+            id: stationId,
+          },
+        },
+      );
+      return result;
+    }
+  }
+
   async deleteWard(id) {
     const checkWard = await this.getWardById(id);
     if (checkWard) {

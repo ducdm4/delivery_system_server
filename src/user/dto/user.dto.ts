@@ -5,7 +5,11 @@ import { CreateAddressDto } from '../../address/dto/createAddress.dto';
 export class CreateUserDto {
   @IsEmail()
   email: string;
-  password: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  dob: string;
+  profilePictureId: number;
   address: CreateAddressDto;
 }
 
