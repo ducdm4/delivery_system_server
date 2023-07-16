@@ -129,10 +129,10 @@ export class UsersController {
     @Res() res: Response,
   ) {
     let addressInfo;
-    if (updateUserPayloadDto.addressId) {
+    if (updateUserPayloadDto.address.id) {
       addressInfo = await this.addressService.updateAddressInfo(
         updateUserPayloadDto.address,
-        updateUserPayloadDto.addressId,
+        updateUserPayloadDto.address.id,
       );
     } else {
       addressInfo = await this.addressService.createAddress(

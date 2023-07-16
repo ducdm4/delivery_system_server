@@ -3,9 +3,11 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { StationEntity } from './station.entity';
 
 @Entity({ name: 'photos' })
 export class PhotoEntity {
@@ -17,6 +19,9 @@ export class PhotoEntity {
 
   @Column()
   mimeType: string;
+
+  @ManyToOne(() => StationEntity, (station) => station.photos)
+  station: StationEntity;
 
   @CreateDateColumn()
   createdAt: Date;

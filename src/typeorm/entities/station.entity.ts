@@ -4,11 +4,15 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { AddressEntity } from './address.entity';
+import { PhotoEntity } from './photo.entity';
+import { WardEntity } from './ward.entity';
 
 @Entity({ name: 'stations' })
 export class StationEntity {
@@ -25,8 +29,17 @@ export class StationEntity {
   @JoinColumn({ name: 'addressId', referencedColumnName: 'id' })
   address: AddressEntity;
 
-  @Column({ nullable: true })
-  parentStation: number;
+  @ManyToOne(
+    (type) => StationEntity,
+    (stationEntity) => stationEntity.parentStation,
+  )
+  parentStation: StationEntity;
+
+  @OneToMany(() => PhotoEntity, (photo) => photo.station, { cascade: true })
+  photos: PhotoEntity[];
+
+  @OneToMany(() => WardEntity, (ward) => ward.station, { cascade: true })
+  wards: WardEntity[];
 
   @Column({ default: true })
   isActive: boolean;

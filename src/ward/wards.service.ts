@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Like, Repository } from 'typeorm';
+import { In, IsNull, Like, Repository } from 'typeorm';
 import { CreateWardDto } from './dto/createWard.dto';
 import { UpdateWardDto } from './dto/updateWard.dto';
 import { WardEntity } from '../typeorm/entities/ward.entity';
@@ -121,19 +121,18 @@ export class WardsService {
     }
   }
 
-  async updateWardStation(stationId: number, id: number) {
-    const checkWard = await this.getWardById(id);
-    if (checkWard) {
-      const result = await this.wardRepository.update(
-        { id },
-        {
-          station: {
-            id: stationId,
-          },
+  async updateWardStation(stationId: number, ids: Array<number>) {
+    const result = await this.wardRepository.update(
+      {
+        id: In(ids),
+      },
+      {
+        station: {
+          id: stationId,
         },
-      );
-      return result;
-    }
+      },
+    );
+    return result;
   }
 
   async deleteWard(id) {
@@ -142,5 +141,25 @@ export class WardsService {
       const result = await this.wardRepository.softDelete(id);
       return result;
     }
+  }
+
+  async getWardNotUnderManage(id) {
+    const wardList = await this.wardRepository.findBy({
+      station: IsNull(),
+      district: {
+        id,
+      },
+    });
+    return wardList;
+  }
+
+  async getWardUnderManage(id) {
+    const wardList = await this.wardRepository.findBy({
+      station: {
+        id,
+      },
+    });
+
+    return wardList;
   }
 }

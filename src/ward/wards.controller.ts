@@ -8,7 +8,6 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  Query,
   Req,
   Res,
 } from '@nestjs/common';
@@ -65,6 +64,23 @@ export class WardsController {
       res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         data: wardsInfo,
+      });
+    });
+  }
+
+  @Get('/not-under-manage/:id')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  findWardNotUnderManage(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const response = this.wardService.getWardNotUnderManage(id);
+    response.then((data) => {
+      res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        data: {
+          list: data,
+        },
       });
     });
   }

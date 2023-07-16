@@ -1,21 +1,26 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class commonUpdateDto {
+  id: number;
+}
 
 export class UpdateAddressDto {
   @IsNumber()
   @IsNotEmpty()
   id: number;
 
-  @IsNumber()
-  cityId: number;
+  @Type(() => commonUpdateDto)
+  ward: commonUpdateDto;
 
-  @IsNumber()
-  districtId: number;
+  @Type(() => commonUpdateDto)
+  street: commonUpdateDto;
 
-  @IsNumber()
-  wardId: number;
+  @Type(() => commonUpdateDto)
+  district: commonUpdateDto;
 
-  @IsNumber()
-  streetId: number;
+  @Type(() => commonUpdateDto)
+  city: commonUpdateDto;
 
   @IsString()
   building: string;

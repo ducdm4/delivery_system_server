@@ -41,7 +41,7 @@ export class AddressesService {
   async updateAddressInfo(data: UpdateAddressDto, id: number) {
     const checkAddress = await this.getAddressById(id);
     if (checkAddress) {
-      const result = await this.addressRepository.update({ id }, data);
+      const result = await this.addressRepository.update({ id }, { ...data });
       return result;
     }
   }
