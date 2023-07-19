@@ -20,9 +20,7 @@ import { Request, Response } from 'express';
 import { PhotosService } from './photos.service';
 import { ROLE_LIST } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
-import { SearchInterface } from '../common/interface/search.interface';
-import { encode } from 'html-entities';
-import { createReadStream, existsSync, open } from 'fs';
+import { createReadStream, open } from 'fs';
 import { join } from 'path';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -65,7 +63,7 @@ export class PhotosController {
           fileType: /(jpg|jpeg|png)$/,
         })
         .addMaxSizeValidator({
-          maxSize: 2048000,
+          maxSize: 1024000,
         })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,

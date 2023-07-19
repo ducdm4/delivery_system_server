@@ -30,6 +30,9 @@ export class OrderEntity {
   @Column()
   senderPhone: string;
 
+  @Column()
+  senderEmail: string;
+
   @OneToOne(() => AddressEntity)
   @JoinColumn()
   pickupAddress: AddressEntity;
@@ -39,6 +42,9 @@ export class OrderEntity {
 
   @Column()
   receiverPhone: string;
+
+  @Column()
+  receiverEmail: string;
 
   @OneToOne(() => AddressEntity)
   @JoinColumn()

@@ -29,6 +29,11 @@ export class AuthService {
         email: true,
         password: true,
         role: true,
+        firstName: true,
+        lastName: true,
+      },
+      relations: {
+        profilePicture: true,
       },
       where: { email },
     });

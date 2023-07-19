@@ -26,6 +26,7 @@ import { Roles } from '../common/decorator/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { ROLE_LIST } from '../common/constant';
 import { AddressesService } from '../address/addresses.service';
+import { generatePasswordString } from '../common/function';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -68,16 +69,7 @@ export class UsersController {
       createUserDto.address,
     );
     const addressId = addressInfo.id;
-    const lowerCase = 'abcdefghijklmnopqrstuvwxyz'[
-      Math.floor(Math.random() * 26)
-    ];
-    const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[
-      Math.floor(Math.random() * 26)
-    ];
-    const special = ')!@#$%^&*('[Math.floor(Math.random() * 10)];
-    const password = `${lowerCase}${upperCase}${special}${Math.floor(
-      Math.random() * 1000,
-    )}`;
+    const password = generatePasswordString();
     const user = await this.userService.addUser(
       createUserDto,
       addressId,

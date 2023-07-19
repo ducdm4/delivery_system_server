@@ -17,24 +17,25 @@ export class StationsService {
       'stationB',
       'station.parentStationId = stationB.id',
     );
-    stationQuery.innerJoin(
+    stationQuery.leftJoin(
       'addresses',
       'address',
       'station.addressId = address.id',
     );
-    stationQuery.innerJoin('wards', 'ward', 'ward.id = address.wardId');
-    stationQuery.innerJoin(
+    stationQuery.leftJoin('wards', 'ward', 'ward.id = address.wardId');
+    stationQuery.leftJoin(
       'districts',
       'district',
       'district.id = address.districtId',
     );
-    stationQuery.innerJoin('cities', 'city', 'city.id = address.cityId');
-    stationQuery.innerJoin('streets', 'street', 'street.id = address.streetId');
+    stationQuery.leftJoin('cities', 'city', 'city.id = address.cityId');
+    stationQuery.leftJoin('streets', 'street', 'street.id = address.streetId');
     stationQuery.select([
       'station.*',
       'address.building',
       'address.detail',
       'street.name as streetName',
+      'stationB.name as parentStationName',
       'ward.name as wardName',
       'district.name as districtName',
       'city.name as cityName',
@@ -59,10 +60,17 @@ export class StationsService {
     }
     if (filter.sort.length) {
       filter.sort.forEach((sortItem) => {
-        stationQuery.orderBy(
-          `station.${sortItem.key}`,
-          sortItem.value.toUpperCase(),
-        );
+        if (sortItem.key === 'parentStation') {
+          stationQuery.orderBy(
+            `station.parentStationId`,
+            sortItem.value.toUpperCase(),
+          );
+        } else {
+          stationQuery.orderBy(
+            `station.${sortItem.key}`,
+            sortItem.value.toUpperCase(),
+          );
+        }
       });
     }
     const totalStation = await stationQuery.getCount();

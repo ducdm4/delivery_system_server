@@ -4,6 +4,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -35,7 +36,7 @@ export class EmployeeInfoEntity {
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: UserEntity;
 
-  @OneToOne(() => StationEntity)
+  @ManyToOne(() => StationEntity)
   @JoinColumn({ name: 'stationId', referencedColumnName: 'id' })
   station: StationEntity;
 

@@ -64,7 +64,7 @@ export class UsersService {
         password: password,
       });
     }
-    return newUser.id;
+    return newUser;
   }
 
   async updateUser(id: number, updateUserDetails: UpdateUserDto) {
