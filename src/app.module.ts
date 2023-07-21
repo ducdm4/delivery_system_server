@@ -8,6 +8,7 @@ import { PhotosModule } from './photo/photos.module';
 import { AddressesModule } from './address/addresses.module';
 import { StationsModule } from './station/stations.module';
 import { EmployeesModule } from './employee/employees.module';
+import { RoutesModule } from './route/routes.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { UsersController } from './user/users.controller';
@@ -19,6 +20,7 @@ import { PhotosController } from './photo/photos.controller';
 import { AddressesController } from './address/addresses.controller';
 import { StationsController } from './station/stations.controller';
 import { EmployeesController } from './employee/employees.controller';
+import { RoutesController } from './route/routes.controller';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
@@ -43,6 +45,7 @@ import { MailModule } from './mail/mail.module';
     MailModule,
     StationsModule,
     EmployeesModule,
+    RoutesModule,
   ],
   providers: [
     {
@@ -65,6 +68,7 @@ export class AppModule implements NestModule {
         AddressesController,
         StationsController,
         EmployeesController,
+        RoutesController,
       );
   }
 }

@@ -32,3 +32,11 @@ export enum ORDER_STATUS {
   ORDER_ARRIVED_STATION_4,
   WAITING_TO_TRANSIT_4,
 }
+
+export class commonUpdateDto {
+  id: number;
+}
+
+export interface KeyValue {
+  [key: string]: any;
+}

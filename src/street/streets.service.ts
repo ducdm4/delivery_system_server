@@ -1,14 +1,17 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Like, Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 import { CreateStreetDto } from './dto/createStreet.dto';
 import { UpdateStreetDto } from './dto/updateStreet.dto';
 import { StreetEntity } from '../typeorm/entities/street.entity';
+import { RouteEntity } from '../typeorm/entities/route.entity';
 
 @Injectable()
 export class StreetsService {
   constructor(
     @Inject('STREET_REPOSITORY')
-    private streetRepository: Repository<StreetEntity>,
+    private readonly streetRepository: Repository<StreetEntity>,
+    @Inject('ROUTE_REPOSITORY')
+    private readonly routeRepository: Repository<RouteEntity>,
   ) {}
 
   async getListStreet(filter) {
@@ -78,6 +81,48 @@ export class StreetsService {
       total: totalStreet,
       list: streetList,
     };
+  }
+
+  async getStreetListNotInRoute(data: { station: number; type: number }) {
+    const { station, type } = data;
+    const streetsInRoute = await this.routeRepository.find({
+      relations: {
+        streets: true,
+      },
+      where: {
+        station: {
+          id: station,
+        },
+        type: type,
+      },
+    });
+    const streetsList = () => {
+      const res = [];
+      streetsInRoute.forEach((item) => {
+        res.push(...item.streets);
+      });
+      return res.map((str) => str.id);
+    };
+    const streets = await this.streetRepository.find({
+      select: {
+        id: true,
+        name: true,
+      },
+      relations: {
+        ward: {
+          station: true,
+        },
+      },
+      where: {
+        id: Not(In(streetsList())),
+        ward: {
+          station: {
+            id: station,
+          },
+        },
+      },
+    });
+    return streets;
   }
 
   async getStreetById(id: number) {

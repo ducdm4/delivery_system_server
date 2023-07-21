@@ -26,7 +26,7 @@ import {
 } from './dto/employees.dto';
 import { SearchInterface } from '../common/interface/search.interface';
 import { encode } from 'html-entities';
-import { generatePasswordString } from '../common/function';
+import { generatePasswordString, getFilterObject } from '../common/function';
 
 @Controller('employees')
 export class EmployeesController {
@@ -39,38 +39,7 @@ export class EmployeesController {
   @Get()
   @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
-    const filterObject: SearchInterface = {
-      keyword: '',
-      sort: [],
-      filter: [],
-      page: 0,
-      limit: 10,
-    };
-    if (typeof req.query['keyword'] === 'string') {
-      filterObject.keyword = encode(req.query['keyword']);
-    }
-    if (typeof req.query['sort'] === 'object') {
-      for (const [key, value] of Object.entries(req.query['sort'])) {
-        filterObject.sort.push({
-          key,
-          value: value as string,
-        });
-      }
-    }
-    if (typeof req.query['filter'] === 'object') {
-      for (const [key, value] of Object.entries(req.query['filter'])) {
-        filterObject.filter.push({
-          key,
-          value: value as string,
-        });
-      }
-    }
-    if (typeof req.query['page'] === 'string') {
-      filterObject.page = parseInt(req.query['page']);
-    }
-    if (typeof req.query['limit'] === 'string') {
-      filterObject.limit = parseInt(req.query['limit']);
-    }
+    const filterObject = getFilterObject(req);
     const employeeList = this.employeeService.getListEmployee(filterObject);
     employeeList.then((employeesInfo) => {
       res.status(HttpStatus.OK).json({

@@ -8,49 +8,37 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Req,
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { WardsService } from './wards.service';
+import { RoutesService } from './routes.service';
 import { ROLE_LIST } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
-import { UpdateWardDto } from './dto/updateWard.dto';
 import { SearchInterface } from '../common/interface/search.interface';
 import { encode } from 'html-entities';
-import { CreateWardDto } from './dto/createWard.dto';
+import { CreateRoutesDto, UpdateRoutesDto } from './dto/routes.dto';
 import { getFilterObject } from '../common/function';
 
-@Controller('wards')
-export class WardsController {
-  constructor(private readonly wardService: WardsService) {}
+@Controller('routes')
+export class RoutesController {
+  constructor(private readonly routeService: RoutesService) {}
 
   @Get()
   @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
+    let routeList = null;
     const filterObject = getFilterObject(req);
-    const wardList = this.wardService.getListWard(filterObject);
-    wardList.then((wardsInfo) => {
+    if (Object.entries(req.query).length === 0) {
+      routeList = this.routeService.getListRoute('');
+    } else {
+      routeList = this.routeService.getListRoute(filterObject);
+    }
+    routeList.then((routes) => {
       res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
-        data: wardsInfo,
-      });
-    });
-  }
-
-  @Get('/not-under-manage/:id')
-  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
-  findWardNotUnderManage(
-    @Param('id', ParseIntPipe) id: number,
-    @Res() res: Response,
-  ) {
-    const response = this.wardService.getWardNotUnderManage(id);
-    response.then((data) => {
-      res.status(HttpStatus.OK).json({
-        statusCode: HttpStatus.OK,
-        data: {
-          list: data,
-        },
+        data: routes,
       });
     });
   }
@@ -58,18 +46,18 @@ export class WardsController {
   @Get(':id')
   @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   findOne(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
-    const wardInfo = this.wardService.getWardById(id);
-    wardInfo.then(
-      (ward) => {
+    const routeInfo = this.routeService.getRouteById(id);
+    routeInfo.then(
+      (route) => {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
-          data: { ward },
+          data: { route },
         });
       },
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'Ward not found',
+          message: 'Route not found',
           data: {},
         });
       },
@@ -78,31 +66,31 @@ export class WardsController {
 
   @Post()
   @Roles([ROLE_LIST.ADMIN])
-  createNewWard(
-    @Body() createWardDto: CreateWardDto,
+  createNewRoute(
+    @Body() createRouteDto: CreateRoutesDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const response = this.wardService.createWard(createWardDto);
-    response.then((wardData) => {
+    const response = this.routeService.createRoute(createRouteDto);
+    response.then((routeData) => {
       res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
-        data: { wardInfo: wardData },
+        data: { routeInfo: routeData },
       });
     });
   }
-
+  //
   @Put(':id')
   @Roles([ROLE_LIST.ADMIN])
-  editWardInfo(
+  editRouteInfo(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateWardData: UpdateWardDto,
+    @Body() updateRouteData: UpdateRoutesDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const response = this.wardService.updateWardInfo(updateWardData, id);
+    const response = this.routeService.updateRouteInfo(updateRouteData, id);
     response.then(
-      (districtData) => {
+      (routeData) => {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
           data: {},
@@ -111,7 +99,7 @@ export class WardsController {
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'Ward not found',
+          message: 'Route not found',
           data: {},
         });
       },
@@ -120,8 +108,8 @@ export class WardsController {
 
   @Delete(':id')
   @Roles([ROLE_LIST.ADMIN])
-  deleteWardInfo(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
-    const response = this.wardService.deleteWard(id);
+  deleteRouteInfo(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    const response = this.routeService.deleteRoute(id);
     response.then(
       (data) => {
         res.status(HttpStatus.OK).json({
@@ -132,7 +120,7 @@ export class WardsController {
       (fail) => {
         res.status(fail.getStatus()).json({
           statusCode: fail.getStatus(),
-          message: 'Ward not found',
+          message: 'Route not found',
           data: {},
         });
       },

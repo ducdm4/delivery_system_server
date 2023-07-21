@@ -22,6 +22,7 @@ import { UpdateStationDto, CreateStationDto } from './dto/station.dto';
 import { AddressesService } from '../address/addresses.service';
 import { WardsService } from '../ward/wards.service';
 import { PhotosService } from '../photo/photos.service';
+import { getFilterObject } from '../common/function';
 
 @Controller('stations')
 export class StationsController {
@@ -35,38 +36,7 @@ export class StationsController {
   @Get()
   @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
-    const filterObject: SearchInterface = {
-      keyword: '',
-      sort: [],
-      filter: [],
-      page: 0,
-      limit: 10,
-    };
-    if (typeof req.query['keyword'] === 'string') {
-      filterObject.keyword = encode(req.query['keyword']);
-    }
-    if (typeof req.query['sort'] === 'object') {
-      for (const [key, value] of Object.entries(req.query['sort'])) {
-        filterObject.sort.push({
-          key,
-          value: value as string,
-        });
-      }
-    }
-    if (typeof req.query['filter'] === 'object') {
-      for (const [key, value] of Object.entries(req.query['filter'])) {
-        filterObject.filter.push({
-          key,
-          value: value as string,
-        });
-      }
-    }
-    if (typeof req.query['page'] === 'string') {
-      filterObject.page = parseInt(req.query['page']);
-    }
-    if (typeof req.query['limit'] === 'string') {
-      filterObject.limit = parseInt(req.query['limit']);
-    }
+    const filterObject = getFilterObject(req);
     const stationList = this.stationService.getListStation(filterObject);
     stationList.then((stationsInfo) => {
       res.status(HttpStatus.OK).json({
@@ -128,37 +98,6 @@ export class StationsController {
     await this.addressService.updateAddressInfo(
       updateStationData.address,
       updateStationData.address.id,
-    );
-
-    const wardListCurrent = await this.wardsService.getWardUnderManage(id);
-    const listWardNotIncluded = wardListCurrent.filter((ward) => {
-      return updateStationData.wards.findIndex((x) => x.id === ward.id) < 0;
-    });
-    const listWardNeedToAdd = updateStationData.wards.filter((ward) => {
-      return wardListCurrent.findIndex((x) => x.id === ward.id) < 0;
-    });
-    await this.wardsService.updateWardStation(
-      null,
-      listWardNotIncluded.map((ward) => ward.id),
-    );
-    await this.wardsService.updateWardStation(
-      id,
-      listWardNeedToAdd.map((ward) => ward.id),
-    );
-
-    const listCurrentPhoto = await this.photosService.findPhotoByStation(id);
-    const listPhotoToDelete = listCurrentPhoto.filter((photo) => {
-      return updateStationData.photos.findIndex((x) => x.id === photo.id) < 0;
-    });
-    await this.photosService.deleteMultiplePhoto(
-      listPhotoToDelete.map((photo) => photo.id),
-    );
-    const listPhotoNeedAddStation = updateStationData.photos.filter((photo) => {
-      return listCurrentPhoto.findIndex((x) => x.id === photo.id);
-    });
-    await this.photosService.updatePhotoStation(
-      listPhotoNeedAddStation.map((photo) => photo.id),
-      id,
     );
 
     const response = this.stationService.updateStationInfo(

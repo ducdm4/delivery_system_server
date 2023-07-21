@@ -2,6 +2,8 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Like, Repository } from 'typeorm';
 import { CreateStationDto, UpdateStationDto } from './dto/station.dto';
 import { StationEntity } from '../typeorm/entities/station.entity';
+import { WardEntity } from '../typeorm/entities/ward.entity';
+import { PhotoEntity } from '../typeorm/entities/photo.entity';
 
 @Injectable()
 export class StationsService {
@@ -128,16 +130,25 @@ export class StationsService {
   async updateStationInfo(data: UpdateStationDto, id: number) {
     const checkStation = await this.getStationById(id);
     if (checkStation) {
-      const result = await this.stationRepository.update(
-        { id },
-        {
-          name: data.name,
-          type: data.type,
-          parentStation: {
-            id: data.parentStationId || null,
-          },
-        },
-      );
+      const station = checkStation;
+      station.name = data.name;
+      station.type = data.type;
+      station.parentStation.id = data.parentStationId || null;
+      const wards = [];
+      data.wards.forEach((ward) => {
+        const wardItem = new WardEntity();
+        wardItem.id = ward.id;
+        wards.push(wardItem);
+      });
+      station.wards = wards;
+      const photos = [];
+      data.photos.forEach((photo) => {
+        const photoItem = new PhotoEntity();
+        photoItem.id = photo.id;
+        photos.push(photoItem);
+      });
+      station.photos = photos;
+      const result = await this.stationRepository.save(station);
       return result;
     }
   }

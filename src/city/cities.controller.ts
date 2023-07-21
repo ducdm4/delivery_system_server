@@ -20,6 +20,7 @@ import { UpdateCityDto } from './dto/updateCity.dto';
 import { SearchInterface } from '../common/interface/search.interface';
 import { encode } from 'html-entities';
 import { CreateCityDto } from './dto/createCity.dto';
+import { getFilterObject } from '../common/function';
 
 @Controller('cities')
 export class CitiesController {
@@ -29,29 +30,7 @@ export class CitiesController {
   @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
     let citiList = null;
-    const filterObject: SearchInterface = {
-      keyword: '',
-      sort: [],
-      page: 0,
-      limit: 10,
-    };
-    if (typeof req.query['keyword'] === 'string') {
-      filterObject.keyword = encode(req.query['keyword']);
-    }
-    if (typeof req.query['sort'] === 'object') {
-      for (const [key, value] of Object.entries(req.query['sort'])) {
-        filterObject.sort.push({
-          key,
-          value: value as string,
-        });
-      }
-    }
-    if (typeof req.query['page'] === 'string') {
-      filterObject.page = parseInt(req.query['page']);
-    }
-    if (typeof req.query['limit'] === 'string') {
-      filterObject.limit = parseInt(req.query['limit']);
-    }
+    const filterObject = getFilterObject(req);
     if (Object.entries(req.query).length === 0) {
       citiList = this.cityService.getListCity('');
     } else {

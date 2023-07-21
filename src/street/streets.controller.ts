@@ -17,9 +17,8 @@ import { StreetsService } from './streets.service';
 import { ROLE_LIST } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
 import { UpdateStreetDto } from './dto/updateStreet.dto';
-import { SearchInterface } from '../common/interface/search.interface';
-import { encode } from 'html-entities';
 import { CreateStreetDto } from './dto/createStreet.dto';
+import { getFilterObject } from '../common/function';
 
 @Controller('streets')
 export class StreetsController {
@@ -28,38 +27,7 @@ export class StreetsController {
   @Get()
   @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
-    const filterObject: SearchInterface = {
-      keyword: '',
-      sort: [],
-      filter: [],
-      page: 0,
-      limit: 10,
-    };
-    if (typeof req.query['keyword'] === 'string') {
-      filterObject.keyword = encode(req.query['keyword']);
-    }
-    if (typeof req.query['sort'] === 'object') {
-      for (const [key, value] of Object.entries(req.query['sort'])) {
-        filterObject.sort.push({
-          key,
-          value: value as string,
-        });
-      }
-    }
-    if (typeof req.query['filter'] === 'object') {
-      for (const [key, value] of Object.entries(req.query['filter'])) {
-        filterObject.filter.push({
-          key,
-          value: value as string,
-        });
-      }
-    }
-    if (typeof req.query['page'] === 'string') {
-      filterObject.page = parseInt(req.query['page']);
-    }
-    if (typeof req.query['limit'] === 'string') {
-      filterObject.limit = parseInt(req.query['limit']);
-    }
+    const filterObject = getFilterObject(req);
     const streetList = this.streetService.getListStreet(filterObject);
     streetList.then((streetsInfo) => {
       res.status(HttpStatus.OK).json({
@@ -78,6 +46,34 @@ export class StreetsController {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
           data: { street },
+        });
+      },
+      (fail) => {
+        res.status(fail.getStatus()).json({
+          statusCode: fail.getStatus(),
+          message: 'Street not found',
+          data: {},
+        });
+      },
+    );
+  }
+
+  @Get('streetsNotInAnyRoute/:stationId/:type')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  findListStreetNotInRoute(
+    @Param('stationId', ParseIntPipe) station: number,
+    @Param('type', ParseIntPipe) type: number,
+    @Res() res: Response,
+  ) {
+    const streetInfo = this.streetService.getStreetListNotInRoute({
+      station,
+      type,
+    });
+    streetInfo.then(
+      (streets) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: { streets },
         });
       },
       (fail) => {
