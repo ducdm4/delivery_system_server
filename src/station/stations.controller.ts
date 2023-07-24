@@ -8,7 +8,6 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  Query,
   Req,
   Res,
 } from '@nestjs/common';
@@ -16,12 +15,8 @@ import { Request, Response } from 'express';
 import { StationsService } from './stations.service';
 import { ROLE_LIST } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
-import { SearchInterface } from '../common/interface/search.interface';
-import { encode } from 'html-entities';
 import { UpdateStationDto, CreateStationDto } from './dto/station.dto';
 import { AddressesService } from '../address/addresses.service';
-import { WardsService } from '../ward/wards.service';
-import { PhotosService } from '../photo/photos.service';
 import { getFilterObject } from '../common/function';
 
 @Controller('stations')
@@ -29,8 +24,6 @@ export class StationsController {
   constructor(
     private readonly addressService: AddressesService,
     private readonly stationService: StationsService,
-    private readonly wardsService: WardsService,
-    private readonly photosService: PhotosService,
   ) {}
 
   @Get()
@@ -55,6 +48,30 @@ export class StationsController {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
           data: { station },
+        });
+      },
+      (fail) => {
+        res.status(fail.getStatus()).json({
+          statusCode: fail.getStatus(),
+          message: 'Station not found',
+          data: {},
+        });
+      },
+    );
+  }
+
+  @Get('child/:id')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  findChildStation(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const stationInfo = this.stationService.getChildStation(id);
+    stationInfo.then(
+      (stations) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: { stations },
         });
       },
       (fail) => {

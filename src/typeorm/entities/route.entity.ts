@@ -38,6 +38,10 @@ export class RouteEntity {
   @JoinTable()
   streets: StreetEntity[];
 
+  @ManyToMany(() => StationEntity, { cascade: true })
+  @JoinTable()
+  childStation: StationEntity[];
+
   @CreateDateColumn()
   createdAt: Date;
 

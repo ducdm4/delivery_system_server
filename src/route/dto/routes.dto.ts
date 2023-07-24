@@ -19,6 +19,9 @@ export class CreateRoutesDto {
 
   @Type(() => commonUpdateDto)
   streets: Array<commonUpdateDto>;
+
+  @Type(() => commonUpdateDto)
+  childStation: Array<commonUpdateDto>;
 }
 
 export class UpdateRoutesDto extends CreateRoutesDto {

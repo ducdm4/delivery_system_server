@@ -9,6 +9,7 @@ import { RouteEntity } from '../typeorm/entities/route.entity';
 import { CreateRoutesDto, UpdateRoutesDto } from './dto/routes.dto';
 import { KeyValue } from '../common/constant';
 import { StreetEntity } from '../typeorm/entities/street.entity';
+import { StationEntity } from '../typeorm/entities/station.entity';
 
 @Injectable()
 export class RoutesService {
@@ -79,6 +80,7 @@ export class RoutesService {
           user: true,
         },
         station: true,
+        childStation: true,
       },
       where: {
         ...filterOption,
@@ -108,6 +110,7 @@ export class RoutesService {
           user: true,
         },
         station: true,
+        childStation: true,
       },
       where: {
         id,
@@ -145,8 +148,17 @@ export class RoutesService {
           streets.push(street);
         });
       }
-
       checkRoute.streets = streets;
+
+      const stations = [];
+      if (data.childStation.length) {
+        data.childStation.forEach((stn) => {
+          const station = new StationEntity();
+          station.id = stn.id;
+          stations.push(station);
+        });
+      }
+      checkRoute.childStation = stations;
       const res = await this.routeRepository.save(route);
       return res;
     }

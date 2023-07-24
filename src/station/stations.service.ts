@@ -1,15 +1,18 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Like, Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 import { CreateStationDto, UpdateStationDto } from './dto/station.dto';
 import { StationEntity } from '../typeorm/entities/station.entity';
 import { WardEntity } from '../typeorm/entities/ward.entity';
 import { PhotoEntity } from '../typeorm/entities/photo.entity';
+import { RouteEntity } from '../typeorm/entities/route.entity';
 
 @Injectable()
 export class StationsService {
   constructor(
     @Inject('STATION_REPOSITORY')
     private stationRepository: Repository<StationEntity>,
+    @Inject('ROUTE_REPOSITORY')
+    private routeRepository: Repository<RouteEntity>,
   ) {}
 
   async getListStation(filter) {
@@ -103,6 +106,48 @@ export class StationsService {
       },
       where: {
         id,
+      },
+    });
+    if (station) {
+      return station;
+    } else {
+      throw new NotFoundException('station not found');
+    }
+  }
+
+  async getChildStation(id: number) {
+    const stationInRoute = await this.routeRepository.find({
+      relations: {
+        childStation: true,
+      },
+      where: {
+        station: {
+          id,
+        },
+        type: 0,
+      },
+    });
+    let stationList = [];
+    stationInRoute.forEach((item) => {
+      stationList = [...stationList, ...item.childStation];
+    });
+    const station = await this.stationRepository.find({
+      relations: {
+        address: {
+          ward: true,
+          street: true,
+          district: true,
+          city: true,
+        },
+        parentStation: true,
+        photos: true,
+        wards: true,
+      },
+      where: {
+        parentStation: {
+          id,
+        },
+        id: Not(In(stationList.map((item) => item.id))),
       },
     });
     if (station) {
