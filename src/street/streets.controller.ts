@@ -25,7 +25,6 @@ export class StreetsController {
   constructor(private readonly streetService: StreetsService) {}
 
   @Get()
-  @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
     const filterObject = getFilterObject(req);
     const streetList = this.streetService.getListStreet(filterObject);
@@ -38,7 +37,6 @@ export class StreetsController {
   }
 
   @Get(':id')
-  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   findOne(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     const streetInfo = this.streetService.getStreetById(id);
     streetInfo.then(

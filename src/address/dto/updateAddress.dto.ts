@@ -27,4 +27,10 @@ export class UpdateAddressDto {
 
   @IsString()
   detail: string;
+
+  @IsNumber()
+  lat: number;
+
+  @IsNumber()
+  lng: number;
 }

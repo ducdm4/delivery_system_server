@@ -27,7 +27,6 @@ export class DistrictsController {
   constructor(private readonly districtService: DistrictsService) {}
 
   @Get()
-  @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
     const filterObject = getFilterObject(req);
     const districtList = this.districtService.getListDistrict(filterObject);
@@ -40,7 +39,6 @@ export class DistrictsController {
   }
 
   @Get(':id')
-  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   findOne(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     const districtInfo = this.districtService.getDistrictById(id);
     districtInfo.then(

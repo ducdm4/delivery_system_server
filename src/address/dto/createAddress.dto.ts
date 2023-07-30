@@ -23,4 +23,10 @@ export class CreateAddressDto {
 
   @IsString()
   detail: string;
+
+  @IsNumber()
+  lat: number;
+
+  @IsNumber()
+  lng: number;
 }

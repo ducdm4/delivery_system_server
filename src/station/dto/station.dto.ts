@@ -21,6 +21,9 @@ class createAddressDto {
   @IsString()
   detail: string;
 
+  lat: number;
+  lng: number;
+
   @Type(() => commonUpdateDto)
   ward: commonUpdateDto;
 

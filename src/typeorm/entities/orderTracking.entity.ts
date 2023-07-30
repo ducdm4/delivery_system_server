@@ -34,16 +34,6 @@ export class OrderTrackingEntity {
   @ManyToOne(() => UserEntity)
   shipperInCharge: UserEntity;
 
-  @OneToOne(() => AddressEntity)
-  @JoinColumn()
-  dropOffAddress: AddressEntity;
-
-  @Column({ type: 'float', nullable: true })
-  cashOnDelivery: number;
-
-  @Column({ type: 'float' })
-  shippingFare: number;
-
   @Column({ default: false })
   isCancel: boolean;
 

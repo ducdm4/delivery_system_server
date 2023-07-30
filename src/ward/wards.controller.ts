@@ -26,7 +26,6 @@ export class WardsController {
   constructor(private readonly wardService: WardsService) {}
 
   @Get()
-  @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
     const filterObject = getFilterObject(req);
     const wardList = this.wardService.getListWard(filterObject);
@@ -56,7 +55,6 @@ export class WardsController {
   }
 
   @Get(':id')
-  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   findOne(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     const wardInfo = this.wardService.getWardById(id);
     wardInfo.then(

@@ -29,7 +29,6 @@ export class PhotosController {
   constructor(private readonly photosService: PhotosService) {}
 
   @Get(':id')
-  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   async findOne(
     @Param('id', ParseIntPipe) id: number,
     @Res({ passthrough: true }) res: Response,
@@ -52,9 +51,8 @@ export class PhotosController {
   }
 
   @Post()
-  @Roles([ROLE_LIST.ADMIN])
   @UseInterceptors(FileInterceptor('image', { dest: './upload' }))
-  createNewCity(
+  createNewPhoto(
     @Req() req: Request,
     @Res() res: Response,
     @UploadedFile(
@@ -89,8 +87,8 @@ export class PhotosController {
   }
 
   @Delete(':id')
-  @Roles([ROLE_LIST.ADMIN])
-  deleteCityInfo(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  deletePhotoInfo(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     const response = this.photosService.deletePhoto(id);
     response.then(
       (data) => {

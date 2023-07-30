@@ -40,6 +40,12 @@ export class AddressEntity {
   @Column({ nullable: true })
   detail: string;
 
+  @Column({ nullable: true, type: 'float' })
+  lat: number;
+
+  @Column({ nullable: true, type: 'float' })
+  lng: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

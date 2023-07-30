@@ -8,6 +8,7 @@ import { PhotosModule } from './photo/photos.module';
 import { AddressesModule } from './address/addresses.module';
 import { StationsModule } from './station/stations.module';
 import { EmployeesModule } from './employee/employees.module';
+import { OrdersModule } from './order/orders.module';
 import { RoutesModule } from './route/routes.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
@@ -20,6 +21,7 @@ import { PhotosController } from './photo/photos.controller';
 import { AddressesController } from './address/addresses.controller';
 import { StationsController } from './station/stations.controller';
 import { EmployeesController } from './employee/employees.controller';
+import { OrdersController } from './order/orders.controller';
 import { RoutesController } from './route/routes.controller';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
@@ -27,6 +29,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './common/guard/roles.guard';
 import { DatabaseModule } from './database/database.module';
 import { MailModule } from './mail/mail.module';
+import { ParcelsModule } from './parcel/parcels.module';
 
 @Module({
   imports: [
@@ -46,6 +49,8 @@ import { MailModule } from './mail/mail.module';
     StationsModule,
     EmployeesModule,
     RoutesModule,
+    ParcelsModule,
+    OrdersModule,
   ],
   providers: [
     {
@@ -69,6 +74,7 @@ export class AppModule implements NestModule {
         StationsController,
         EmployeesController,
         RoutesController,
+        OrdersController,
       );
   }
 }

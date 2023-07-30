@@ -27,7 +27,6 @@ export class CitiesController {
   constructor(private readonly cityService: CitiesService) {}
 
   @Get()
-  @Roles([ROLE_LIST.ADMIN])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
     let citiList = null;
     const filterObject = getFilterObject(req);

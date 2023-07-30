@@ -45,7 +45,7 @@ export class AddressesController {
 
   @Post()
   @Roles([ROLE_LIST.ADMIN])
-  createNewCity(
+  createNewAddress(
     @Body() createAddressDto: CreateAddressDto,
     @Req() req: Request,
     @Res() res: Response,

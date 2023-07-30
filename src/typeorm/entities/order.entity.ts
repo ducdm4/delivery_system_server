@@ -50,13 +50,13 @@ export class OrderEntity {
   @JoinColumn()
   dropOffAddress: AddressEntity;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'float', nullable: true, default: 0 })
   cashOnDelivery: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', default: 0 })
   shippingFare: number;
 
-  @Column()
+  @Column({ default: 0 })
   numberOfAtTemp: number;
 
   @Column({ default: false })

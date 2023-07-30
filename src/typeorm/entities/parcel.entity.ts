@@ -21,9 +21,9 @@ export class ParcelEntity {
   order: OrderEntity;
 
   @Column()
-  name: string;
+  description: string;
 
-  @Column({ type: 'float' })
+  @Column()
   weight: number;
 
   @OneToOne(() => PhotoEntity)
