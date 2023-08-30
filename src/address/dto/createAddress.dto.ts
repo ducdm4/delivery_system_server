@@ -24,9 +24,7 @@ export class CreateAddressDto {
   @IsString()
   detail: string;
 
-  @IsNumber()
-  lat: number;
+  lat: number | null;
 
-  @IsNumber()
-  lng: number;
+  lng: number | null;
 }

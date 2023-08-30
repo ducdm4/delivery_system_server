@@ -40,3 +40,10 @@ export class commonUpdateDto {
 export interface KeyValue {
   [key: string]: any;
 }
+
+export const GENERAL_CONFIG = {
+  baseRate: 10000,
+  weightLevel: 3000,
+  ward: 4000,
+  district: 6000,
+};

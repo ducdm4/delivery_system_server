@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { In, Like, Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { CreateStationDto, UpdateStationDto } from './dto/station.dto';
 import { StationEntity } from '../typeorm/entities/station.entity';
 import { WardEntity } from '../typeorm/entities/ward.entity';
@@ -113,6 +113,32 @@ export class StationsService {
     } else {
       throw new NotFoundException('station not found');
     }
+  }
+
+  async getStationByWard(id: number) {
+    const stationQuery = this.stationRepository.createQueryBuilder('station');
+    stationQuery.select([
+      'station.id as id',
+      'station.name as stationName',
+      'station.parentStationId as parentId',
+      'station.type as type',
+      'w2.name as wardName',
+      'ct.name as cityName',
+      'dt.name as districtName',
+      'st.name as streetName',
+      'add.building as buildingName',
+      'add.detail as addDetail',
+    ]);
+    stationQuery.leftJoin('wards', 'w', 'station.id = w.stationId');
+    stationQuery.leftJoin('addresses', 'add', 'station.addressId = add.id');
+    stationQuery.leftJoin('wards', 'w2', 'add.wardId = w2.id');
+    stationQuery.leftJoin('cities', 'ct', 'ct.id = add.cityId');
+    stationQuery.leftJoin('districts', 'dt', 'dt.id = add.districtId');
+    stationQuery.leftJoin('streets', 'st', 'st.id = add.streetId');
+    stationQuery.andWhere(`w.id = :wid`, {
+      wid: id,
+    });
+    return await stationQuery.getRawOne();
   }
 
   async getChildStation(id: number) {

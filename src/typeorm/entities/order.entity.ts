@@ -62,6 +62,9 @@ export class OrderEntity {
   @Column({ default: false })
   isCancel: boolean;
 
+  @Column({ default: false })
+  isRecipientPayingFare: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

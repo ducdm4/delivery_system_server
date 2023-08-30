@@ -10,6 +10,7 @@ import { StationsModule } from './station/stations.module';
 import { EmployeesModule } from './employee/employees.module';
 import { OrdersModule } from './order/orders.module';
 import { RoutesModule } from './route/routes.module';
+import { ConfigsModule } from './config/configs.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { UsersController } from './user/users.controller';
@@ -23,6 +24,7 @@ import { StationsController } from './station/stations.controller';
 import { EmployeesController } from './employee/employees.controller';
 import { OrdersController } from './order/orders.controller';
 import { RoutesController } from './route/routes.controller';
+import { ConfigsController } from './config/configs.controller';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
@@ -51,6 +53,7 @@ import { ParcelsModule } from './parcel/parcels.module';
     RoutesModule,
     ParcelsModule,
     OrdersModule,
+    ConfigsModule,
   ],
   providers: [
     {
@@ -75,6 +78,7 @@ export class AppModule implements NestModule {
         EmployeesController,
         RoutesController,
         OrdersController,
+        ConfigsController,
       );
   }
 }

@@ -34,9 +34,6 @@ export class OrderTrackingEntity {
   @ManyToOne(() => UserEntity)
   shipperInCharge: UserEntity;
 
-  @Column({ default: false })
-  isCancel: boolean;
-
   @CreateDateColumn()
   createdAt: Date;
 

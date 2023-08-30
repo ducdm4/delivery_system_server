@@ -73,21 +73,6 @@ export class RoutesService {
       ...paginateOption,
       ...orderOption,
     });
-    console.log({
-      relations: {
-        streets: true,
-        employee: {
-          user: true,
-        },
-        station: true,
-        childStation: true,
-      },
-      where: {
-        ...filterOption,
-      },
-      ...paginateOption,
-      ...orderOption,
-    });
 
     const routeCount = await this.routeRepository.count({
       where: {

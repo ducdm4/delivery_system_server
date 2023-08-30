@@ -4,6 +4,7 @@ import { CreateUserDto, UpdateUserDto } from '../../user/dto/user.dto';
 import { UpdateAddressDto } from '../../address/dto/updateAddress.dto';
 import {
   IsArray,
+  IsBoolean,
   IsDefined,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -13,7 +14,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { commonUpdateDto } from '../../common/constant';
-import { BasicParcelInfo } from '../../parcel/dto/parcel.dto';
+import { BasicParcelInfo, ParcelInfoQuote } from '../../parcel/dto/parcel.dto';
 
 export class BasicOrderInfo {
   @IsDefined()
@@ -40,6 +41,10 @@ export class BasicOrderInfo {
   @IsString()
   @IsNotEmpty()
   receiverName: string;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  isTakeParcelMySelf: boolean;
 
   @IsString()
   @IsNotEmpty()
@@ -68,4 +73,26 @@ export class BasicOrderInfo {
 
   @IsNumber()
   shippingFare: number;
+}
+
+export class OrderInfoQuote {
+  @IsDefined()
+  @IsArray()
+  @ValidateNested()
+  @Type(() => ParcelInfoQuote)
+  parcels: Array<ParcelInfoQuote>;
+
+  @IsDefined()
+  @IsObject()
+  @ValidateNested()
+  @IsNotEmptyObject()
+  @Type(() => CreateAddressDto)
+  pickupAddress: CreateAddressDto;
+
+  @IsDefined()
+  @IsObject()
+  @ValidateNested()
+  @IsNotEmptyObject()
+  @Type(() => CreateAddressDto)
+  dropOffAddress: CreateAddressDto;
 }

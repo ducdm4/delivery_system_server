@@ -12,6 +12,7 @@ import { ParcelEntity } from '../typeorm/entities/parcel.entity';
 import { OrderTrackingEntity } from '../typeorm/entities/orderTracking.entity';
 import { WardsService } from '../ward/wards.service';
 import { dataSource } from '../database/database.providers';
+import { ORDER_STATUS } from '../common/constant';
 
 @Injectable()
 export class OrdersService {
@@ -70,8 +71,9 @@ export class OrdersService {
       }
 
       const trackingItem = this.orderTrackingRepository.create({
-        status: 0,
-        isCancel: false,
+        status: orderData.isTakeParcelMySelf
+          ? ORDER_STATUS.WAITING_CUSTOMER_BRING_TO_STATION
+          : ORDER_STATUS.ORDER_CREATED,
         order: {
           id: orderSaved.id,
         },
