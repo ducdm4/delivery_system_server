@@ -2,23 +2,29 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OrdersService } from './orders.service';
 import { StationsService } from '../station/stations.service';
 import { BasicOrderInfo, OrderInfoQuote } from './dto/order.dto';
-import { GENERAL_CONFIG, STATION_TYPE } from '../common/constant';
+import { GENERAL_CONFIG, ROLE_LIST, STATION_TYPE } from '../common/constant';
+import { Roles } from '../common/decorator/roles.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('orders')
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
     private readonly stationsService: StationsService,
-  ) {}
+  ) { }
 
   @Post()
   async createNewOrder(
@@ -58,6 +64,38 @@ export class OrdersController {
           message: 'Your pickup or drop-off address is out of service',
           data: {},
         });
+      },
+    );
+  }
+
+  @Get('/status/:status')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  async getOrderByStatus(
+    @Param('status', ParseIntPipe) status: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const stationId =
+      req.user['role'] === ROLE_LIST.OPERATOR
+        ? req.user['employeeInfo']['station']['id']
+        : null;
+    const orderList = this.ordersService.getOrderByStatus(status, stationId);
+    orderList.then(
+      (orders) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: { orders },
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
       },
     );
   }

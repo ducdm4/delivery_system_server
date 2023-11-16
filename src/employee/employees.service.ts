@@ -99,6 +99,24 @@ export class EmployeesService {
     }
   }
 
+  async getEmployeeByUserId(id: number) {
+    const employee = await this.employeeRepository.findOne({
+      relations: {
+        station: true,
+      },
+      where: {
+        user: {
+          id,
+        },
+      },
+    });
+    if (employee) {
+      return employee;
+    } else {
+      throw new NotFoundException('employee not found');
+    }
+  }
+
   async createEmployee(employeeData: CreateEmployeeAdd) {
     const newEmployee = this.employeeRepository.create({
       ...employeeData,

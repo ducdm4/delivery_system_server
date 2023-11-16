@@ -11,18 +11,20 @@ import { Repository } from 'typeorm';
 import { SignInDto } from './dto/signIn.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { ROLE_LIST } from '../common/constant';
+import { EmployeesService } from '../employee/employees.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject('USER_REPOSITORY')
     private userRepository: Repository<UserEntity>,
-    private usersService: UsersService,
+    private employeesService: EmployeesService,
     private jwtService: JwtService,
   ) {}
 
   async signIn(loginInfo: SignInDto) {
-    const { email, password, role } = loginInfo;
+    const { email, password } = loginInfo;
     const user = await this.userRepository.findOne({
       select: {
         id: true,
@@ -41,12 +43,19 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
     const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch && user.role === role) {
+    if (isMatch) {
       delete user.password;
-      const tokens = await this.getTokens(user);
+      let employeeInfo = null;
+      if (user.role !== ROLE_LIST.ADMIN && user.role !== ROLE_LIST.CUSTOMER) {
+        employeeInfo = await this.employeesService.getEmployeeByUserId(user.id);
+      }
+      const tokens = await this.getTokens({ ...user, employeeInfo });
       return {
         tokens,
-        user,
+        user: {
+          ...user,
+          employeeInfo,
+        },
       };
     } else {
       throw new NotFoundException('Incorrect login info');
@@ -55,13 +64,10 @@ export class AuthService {
 
   async getTokens(user: Express.User) {
     const [accessToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { user },
-        {
-          secret: process.env.JWT_SECRET,
-          expiresIn: '6h',
-        },
-      ),
+      this.jwtService.signAsync(user, {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '6h',
+      }),
     ]);
 
     return {

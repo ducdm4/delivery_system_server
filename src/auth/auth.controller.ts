@@ -21,7 +21,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   @Post('login')
   @UseGuards(AuthGuard('local'))
@@ -54,7 +54,7 @@ export class AuthController {
     const user: Express.User = req.user;
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      data: { user },
+      data: user,
     });
   }
 }

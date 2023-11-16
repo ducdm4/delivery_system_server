@@ -22,7 +22,7 @@ export class AuthMiddleware implements NestMiddleware {
 
     try {
       const verifyRes = verify(accessToken, process.env.JWT_SECRET);
-      user = await this.userService.findUserById(verifyRes['user'].id);
+      user = verifyRes;
     } catch (error) {
       throw new UnauthorizedException('Please sign in');
     }

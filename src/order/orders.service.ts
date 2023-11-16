@@ -26,7 +26,7 @@ export class OrdersService {
     @Inject('ORDER_TRACKING_REPOSITORY')
     private orderTrackingRepository: Repository<OrderTrackingEntity>,
     private wardsService: WardsService,
-  ) {}
+  ) { }
 
   async createOrder(orderData: BasicOrderInfo) {
     const queryRunner = dataSource.createQueryRunner();
@@ -58,6 +58,7 @@ export class OrdersService {
         },
         uniqueTrackingId: trackingId,
       });
+
       orderSaved = await queryRunner.manager.save(order);
 
       for (const parcel of orderData.parcels) {
@@ -67,7 +68,6 @@ export class OrdersService {
             id: orderSaved.id,
           },
         });
-        await queryRunner.manager.save(parcelInfo);
       }
 
       const trackingItem = this.orderTrackingRepository.create({
@@ -86,10 +86,93 @@ export class OrdersService {
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
-      return err;
+            return err;
     } finally {
       await queryRunner.release();
     }
     return orderSaved;
+  }
+
+  async getOrderByStatus(status: number, stationId: number | null) {
+    console.log('stationId', stationId);
+    console.log('status', status);
+    const subQuery = this.orderTrackingRepository.createQueryBuilder('ot1')
+    subQuery.select('MAX(ot1.status)', 'mStatus')
+    subQuery.addSelect('ot1.orderId');
+    subQuery.addSelect('ot1.stationInChargeId');
+    subQuery.groupBy('ot1.orderId');
+
+    const query = this.orderTrackingRepository.createQueryBuilder('ot');
+    query.select('r.orderId');
+    query.addSelect('r.mStatus', 'mStatus');
+    query.from(`(${subQuery.getQuery()})`, 'r')
+    query.where('r.mStatus = :status', { status });
+    if (stationId !== null) {
+      query.andWhere('r.stationInChargeId = :stationId', { stationId });
+    }
+    query.groupBy('r.orderId');
+    query.limit(10)
+
+    const listId = await query.getRawMany();
+
+    const res = await this.orderRepository.find({
+      select: {
+        pickupAddress: {
+          building: true,
+          detail: true,
+          city: {
+            name: true
+          },
+          district: {
+            name: true
+          },
+          ward: {
+            name: true
+          },
+          street: {
+            name: true
+          }
+        },
+        dropOffAddress: {
+          building: true,
+          detail: true,
+          city: {
+            name: true
+          },
+          district: {
+            name: true
+          },
+          ward: {
+            name: true
+          },
+          street: {
+            name: true
+          }
+        }
+      },
+      relations: {
+        pickupAddress: {
+          city: true,
+          ward: true,
+          street: true,
+          district: true
+        },
+        dropOffAddress: {
+          city: true,
+          ward: true,
+          street: true,
+          district: true
+        },
+        parcels: {
+          photo: true
+        }
+      },
+      where: {
+        id: In(listId.map(x => x.orderId))
+      }
+    })
+
+    console.log(res)
+    return res;
   }
 }

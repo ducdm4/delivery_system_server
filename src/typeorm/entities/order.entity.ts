@@ -5,12 +5,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { AddressEntity } from './address.entity';
+import { ParcelEntity } from './parcel.entity';
 
 @Entity({ name: 'orders' })
 export class OrderEntity {
@@ -64,6 +66,9 @@ export class OrderEntity {
 
   @Column({ default: false })
   isRecipientPayingFare: boolean;
+
+  @OneToMany(() => ParcelEntity, (parcel) => parcel.order, { cascade: true })
+  parcels: ParcelEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

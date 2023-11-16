@@ -7,9 +7,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
 import { UsersService } from '../user/users.service';
+import { EmployeesService } from '../employee/employees.service';
 import { MailService } from '../mail/mail.service';
 import { DatabaseModule } from '../database/database.module';
 import { UserProviders } from '../typeorm/providers/user.providers';
+import { EmployeeProviders } from '../typeorm/providers/employee.providers';
 
 @Module({
   imports: [
@@ -23,8 +25,10 @@ import { UserProviders } from '../typeorm/providers/user.providers';
   controllers: [AuthController],
   providers: [
     ...UserProviders,
+    ...EmployeeProviders,
     AuthService,
     UsersService,
+    EmployeesService,
     LocalStrategy,
     JwtStrategy,
     MailService,

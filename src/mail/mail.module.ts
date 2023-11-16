@@ -18,7 +18,7 @@ import { join } from 'path';
         },
       },
       defaults: {
-        from: '"No Reply" <noreply@delivery-system.com>',
+        from: '"Delivery System Automation" <noreply@delivery-system.com>',
       },
       template: {
         dir: join(__dirname, 'templates'),
