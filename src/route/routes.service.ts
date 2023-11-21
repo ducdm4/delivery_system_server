@@ -156,4 +156,22 @@ export class RoutesService {
       return result;
     }
   }
+
+  async getRouteByStreet(stationId: number, type: number, streetId) {
+    const route = await this.routeRepository.findOne({
+      relations: {
+        employee: true,
+      },
+      where: {
+        station: {
+          id: stationId,
+        },
+        type,
+        streets: {
+          id: streetId,
+        },
+      },
+    });
+    return route;
+  }
 }

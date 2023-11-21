@@ -150,4 +150,21 @@ export class EmployeesService {
       return result;
     }
   }
+
+  async findUserByTypeAndStation(type: number, stationId: number) {
+    const employeeList = await this.employeeRepository.find({
+      relations: {
+        user: true,
+      },
+      where: {
+        station: {
+          id: stationId,
+        },
+        user: {
+          role: type,
+        },
+      },
+    });
+    return employeeList;
+  }
 }

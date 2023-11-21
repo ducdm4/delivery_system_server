@@ -70,6 +70,9 @@ export class OrderEntity {
   @OneToMany(() => ParcelEntity, (parcel) => parcel.order, { cascade: true })
   parcels: ParcelEntity[];
 
+  @Column()
+  isCancelNote: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

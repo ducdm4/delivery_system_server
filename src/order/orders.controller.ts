@@ -6,10 +6,10 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Req,
   Res,
-  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OrdersService } from './orders.service';
@@ -17,14 +17,13 @@ import { StationsService } from '../station/stations.service';
 import { BasicOrderInfo, OrderInfoQuote } from './dto/order.dto';
 import { GENERAL_CONFIG, ROLE_LIST, STATION_TYPE } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('orders')
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
     private readonly stationsService: StationsService,
-  ) { }
+  ) {}
 
   @Post()
   async createNewOrder(
@@ -85,6 +84,75 @@ export class OrdersController {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
           data: { orders },
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
+  }
+
+  @Patch('/cancelOrderOperator/:id')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  async cancelOrderByOperator(
+    @Body() data: { note: string },
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const stationId =
+      req.user['role'] === ROLE_LIST.OPERATOR
+        ? req.user['employeeInfo']['station']['id']
+        : null;
+    const response = this.ordersService.cancelOrderByOperator(
+      id,
+      data.note,
+      stationId,
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data,
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
+  }
+
+  @Patch('/operatorConfirmOrder/:id')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  async operatorConfirmOrder(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const stationId =
+      req.user['role'] === ROLE_LIST.OPERATOR
+        ? req.user['employeeInfo']['station']['id']
+        : null;
+    const response = this.ordersService.operatorConfirmOrder(id, stationId);
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: {},
         });
       },
       (fail) => {
