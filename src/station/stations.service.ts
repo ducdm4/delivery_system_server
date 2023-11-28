@@ -5,6 +5,8 @@ import { StationEntity } from '../typeorm/entities/station.entity';
 import { WardEntity } from '../typeorm/entities/ward.entity';
 import { PhotoEntity } from '../typeorm/entities/photo.entity';
 import { RouteEntity } from '../typeorm/entities/route.entity';
+import { ConfigsService } from 'src/config/configs.service';
+import { STATION_CONNECTED_PATH_KEY } from 'src/common/constant';
 
 @Injectable()
 export class StationsService {
@@ -13,6 +15,7 @@ export class StationsService {
     private stationRepository: Repository<StationEntity>,
     @Inject('ROUTE_REPOSITORY')
     private routeRepository: Repository<RouteEntity>,
+    private configService: ConfigsService,
   ) {}
 
   async getListStation(filter) {
@@ -101,6 +104,7 @@ export class StationsService {
           city: true,
         },
         parentStation: true,
+        stationConnected: true,
         photos: true,
         wards: true,
       },
@@ -195,6 +199,23 @@ export class StationsService {
       createdAt: new Date(),
     });
     const data = await this.stationRepository.save(newStation);
+
+    // add new connected
+    for (let i = 0; i < stationData.stationConnected.length; i++) {
+      const stationReverse = await this.stationRepository.findOne({
+        relations: {
+          stationConnected: true,
+        },
+        where: {
+          id: stationData.stationConnected[i].id,
+        },
+      });
+      const stationReverseItem = new StationEntity();
+      stationReverseItem.id = data.id;
+      stationReverse.stationConnected.push(stationReverseItem);
+      await this.stationRepository.save(stationReverse);
+    }
+
     return data;
   }
 
@@ -204,14 +225,71 @@ export class StationsService {
       const station = checkStation;
       station.name = data.name;
       station.type = data.type;
-      station.parentStation.id = data.parentStationId || null;
+      if (data.parentStationId) {
+        station.parentStation.id = data.parentStationId;
+      }
       const wards = [];
       data.wards.forEach((ward) => {
         const wardItem = new WardEntity();
         wardItem.id = ward.id;
         wards.push(wardItem);
       });
+      const stationConnected = station.stationConnected;
+
+      const needToRemoveConnected = !data.stationConnected.length
+        ? station.stationConnected
+        : station.stationConnected.filter((item) => {
+            return data.stationConnected.findIndex((x) => x.id === item.id) < 0;
+          });
+      const needToAddConnected = !station.stationConnected.length
+        ? data.stationConnected
+        : data.stationConnected.filter((item) => {
+            return (
+              station.stationConnected.findIndex((x) => x.id === item.id) < 0
+            );
+          });
+      // remove old connected
+      for (let i = 0; i < needToRemoveConnected.length; i++) {
+        const index1 = stationConnected.findIndex(
+          (x) => x.id === needToRemoveConnected[i].id,
+        );
+        stationConnected.splice(index1, 1);
+        const stationDelete = await this.stationRepository.findOne({
+          relations: {
+            stationConnected: true,
+          },
+          where: {
+            id: needToRemoveConnected[i].id,
+          },
+        });
+        const index = stationDelete.stationConnected.findIndex(
+          (x) => x.id === id,
+        );
+        stationDelete.stationConnected.splice(index, 1);
+        await this.stationRepository.save(stationDelete);
+      }
+
+      // add new connected
+      for (let i = 0; i < needToAddConnected.length; i++) {
+        const staItem = new StationEntity();
+        staItem.id = needToAddConnected[i].id;
+        stationConnected.push(staItem);
+        const stationReverse = await this.stationRepository.findOne({
+          relations: {
+            stationConnected: true,
+          },
+          where: {
+            id: needToAddConnected[i].id,
+          },
+        });
+        const stationReverseItem = new StationEntity();
+        stationReverseItem.id = id;
+        stationReverse.stationConnected.push(stationReverseItem);
+        await this.stationRepository.save(stationReverse);
+      }
+
       station.wards = wards;
+      station.stationConnected = stationConnected;
       const photos = [];
       data.photos.forEach((photo) => {
         const photoItem = new PhotoEntity();
@@ -220,8 +298,11 @@ export class StationsService {
       });
       station.photos = photos;
       const result = await this.stationRepository.save(station);
+      this.reCalStationGraph();
       return result;
     }
+
+    return false;
   }
 
   async deleteStation(id) {
@@ -230,5 +311,48 @@ export class StationsService {
       const result = await this.stationRepository.softDelete(id);
       return result;
     }
+  }
+
+  async getStationWithSameType(type: number) {
+    const stationsList = await this.stationRepository.find({
+      where: {
+        type,
+      },
+    });
+    return stationsList;
+  }
+
+  async reCalStationGraph() {
+    const allStation = await this.stationRepository.find({
+      select: {
+        parentStation: {
+          id: true,
+        },
+        stationConnected: {
+          id: true,
+        },
+      },
+      relations: {
+        stationConnected: true,
+        parentStation: true,
+      },
+    });
+    const stationPair = [];
+    allStation.forEach((station) => {
+      if (station.parentStation) {
+        stationPair.push({ s: station.id, f: station.parentStation.id });
+        stationPair.push({ s: station.parentStation.id, f: station.id });
+      }
+      if (station.stationConnected.length) {
+        station.stationConnected.forEach((st) => {
+          stationPair.push({ s: station.id, f: st.id });
+        });
+      }
+    });
+    const res = await this.configService.updateValueByKey(
+      STATION_CONNECTED_PATH_KEY,
+      JSON.stringify(stationPair),
+    );
+    return res;
   }
 }

@@ -60,6 +60,8 @@ export class CreateStationDto {
   addressId: number;
 
   parentStationId: number;
+
+  stationConnected: Array<{ id: number }>;
 }
 
 export class UpdateStationDto extends CreateStationDto {

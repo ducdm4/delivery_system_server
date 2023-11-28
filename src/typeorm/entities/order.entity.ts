@@ -61,6 +61,9 @@ export class OrderEntity {
   @Column({ default: 0 })
   numberOfAtTemp: number;
 
+  @Column({ default: 0 })
+  attempToPickup: number;
+
   @Column({ default: false })
   isCancel: boolean;
 
@@ -69,6 +72,9 @@ export class OrderEntity {
 
   @OneToMany(() => ParcelEntity, (parcel) => parcel.order, { cascade: true })
   parcels: ParcelEntity[];
+
+  @Column()
+  stationRoutine: string;
 
   @Column()
   isCancelNote: string;

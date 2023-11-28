@@ -19,6 +19,7 @@ import { DistrictsController } from './district/districts.controller';
 import { WardsController } from './ward/wards.controller';
 import { StreetsController } from './street/streets.controller';
 import { PhotosController } from './photo/photos.controller';
+import { ManifestsController } from './manifest/manifests.controller';
 import { AddressesController } from './address/addresses.controller';
 import { StationsController } from './station/stations.controller';
 import { EmployeesController } from './employee/employees.controller';
@@ -32,6 +33,7 @@ import { RolesGuard } from './common/guard/roles.guard';
 import { DatabaseModule } from './database/database.module';
 import { MailModule } from './mail/mail.module';
 import { ParcelsModule } from './parcel/parcels.module';
+import { ManifestsModule } from './manifest/manifests.module';
 
 @Module({
   imports: [
@@ -54,6 +56,7 @@ import { ParcelsModule } from './parcel/parcels.module';
     ParcelsModule,
     OrdersModule,
     ConfigsModule,
+    ManifestsModule,
   ],
   providers: [
     {
@@ -79,6 +82,7 @@ export class AppModule implements NestModule {
         RoutesController,
         OrdersController,
         ConfigsController,
+        ManifestsController,
       );
   }
 }

@@ -96,3 +96,16 @@ export class OrderInfoQuote {
   @Type(() => CreateAddressDto)
   dropOffAddress: CreateAddressDto;
 }
+
+export class CollectorCancelOrderData {
+  @IsString()
+  proofNote: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  proofImageId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  manifestId: number;
+}

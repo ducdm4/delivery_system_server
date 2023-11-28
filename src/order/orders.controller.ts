@@ -14,7 +14,11 @@ import {
 import { Request, Response } from 'express';
 import { OrdersService } from './orders.service';
 import { StationsService } from '../station/stations.service';
-import { BasicOrderInfo, OrderInfoQuote } from './dto/order.dto';
+import {
+  BasicOrderInfo,
+  CollectorCancelOrderData,
+  OrderInfoQuote,
+} from './dto/order.dto';
 import { GENERAL_CONFIG, ROLE_LIST, STATION_TYPE } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
 
@@ -70,7 +74,7 @@ export class OrdersController {
   @Get('/status/:status')
   @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   async getOrderByStatus(
-    @Param('status', ParseIntPipe) status: number,
+    @Param('status') status: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -78,7 +82,10 @@ export class OrdersController {
       req.user['role'] === ROLE_LIST.OPERATOR
         ? req.user['employeeInfo']['station']['id']
         : null;
-    const orderList = this.ordersService.getOrderByStatus(status, stationId);
+    const orderList = this.ordersService.getOrderByStatus(
+      status.split(','),
+      stationId,
+    );
     orderList.then(
       (orders) => {
         res.status(HttpStatus.OK).json({
@@ -168,6 +175,72 @@ export class OrdersController {
     );
   }
 
+  @Patch('/collectorCancel/:trackingId')
+  @Roles([ROLE_LIST.COLLECTOR])
+  async collectorCancelOrder(
+    @Param('trackingId', ParseIntPipe) trackingId: string,
+    @Body() collectorCancelOrderData: CollectorCancelOrderData,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.ordersService.cancelOrderByCollector(
+      trackingId,
+      collectorCancelOrderData,
+      req.user['employeeInfo']['id'],
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: {},
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
+  }
+
+  @Patch('/collectorConfirm/:trackingId')
+  @Roles([ROLE_LIST.COLLECTOR])
+  async collectorConfirmOrder(
+    @Param('trackingId', ParseIntPipe) trackingId: string,
+    @Body() collectorCancelOrderData: CollectorCancelOrderData,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.ordersService.confirmOrderByCollector(
+      trackingId,
+      collectorCancelOrderData,
+      req.user['employeeInfo']['id'],
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: {},
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
+  }
+
   async calculateFee(createOrderData: OrderInfoQuote) {
     let result = GENERAL_CONFIG.baseRate;
     //get station info
@@ -189,59 +262,14 @@ export class OrdersController {
     });
     result += (totalWeight - 1) * GENERAL_CONFIG.weightLevel;
 
-    // case both is ward station
-    if (stationPickup.id === stationDrop.id) {
-      return result;
-    }
-
-    // case ward to ward
+    // case same city
     if (
-      stationPickup.type === STATION_TYPE.WARD &&
-      stationDrop.type === STATION_TYPE.WARD
+      createOrderData.pickupAddress.city.id ===
+      createOrderData.dropOffAddress.city.id
     ) {
-      if (stationPickup.parentId === stationDrop.parentId) {
-        result += GENERAL_CONFIG.ward;
-      } else {
-        result += GENERAL_CONFIG.ward + GENERAL_CONFIG.district;
-      }
-    }
-
-    // case ward -> district and vice versa and still same district
-    if (
-      stationPickup.parentId === stationDrop.id ||
-      stationDrop.parentId === stationPickup.id
-    ) {
-      result += GENERAL_CONFIG.ward;
-    }
-
-    // case ward -> district and vice versa and different district
-    if (
-      (stationPickup.type === STATION_TYPE.WARD &&
-        stationDrop.type === STATION_TYPE.DISTRICT &&
-        stationPickup.parentId !== stationDrop.id) ||
-      (stationPickup.type === STATION_TYPE.DISTRICT &&
-        stationDrop.type === STATION_TYPE.WARD &&
-        stationPickup.id !== stationDrop.parentId)
-    ) {
-      result += GENERAL_CONFIG.ward + GENERAL_CONFIG.district;
-    }
-
-    // case district -> district
-    if (
-      stationPickup.type === STATION_TYPE.DISTRICT &&
-      stationDrop.type === STATION_TYPE.DISTRICT
-    ) {
-      result += GENERAL_CONFIG.district;
-    }
-
-    // case district -> city and vice versa
-    if (
-      (stationPickup.type === STATION_TYPE.DISTRICT &&
-        stationDrop.type === STATION_TYPE.CITY) ||
-      (stationPickup.type === STATION_TYPE.CITY &&
-        stationDrop.type === STATION_TYPE.DISTRICT)
-    ) {
-      result += GENERAL_CONFIG.district;
+      result += GENERAL_CONFIG.city;
+    } else {
+      result += GENERAL_CONFIG.differentCity;
     }
 
     return result;

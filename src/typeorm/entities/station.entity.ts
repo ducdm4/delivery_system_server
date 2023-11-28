@@ -4,6 +4,8 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -34,6 +36,10 @@ export class StationEntity {
     (stationEntity) => stationEntity.parentStation,
   )
   parentStation: StationEntity;
+
+  @ManyToMany(() => StationEntity, { cascade: true })
+  @JoinTable()
+  stationConnected: StationEntity[];
 
   @OneToMany(() => PhotoEntity, (photo) => photo.station, { cascade: true })
   photos: PhotoEntity[];

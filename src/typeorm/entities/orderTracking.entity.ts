@@ -10,9 +10,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { AddressEntity } from './address.entity';
 import { OrderEntity } from './order.entity';
 import { StationEntity } from './station.entity';
+import { PhotoEntity } from './photo.entity';
 
 @Entity({ name: 'order_tracking' })
 export class OrderTrackingEntity {
@@ -25,14 +25,24 @@ export class OrderTrackingEntity {
   @Column()
   status: number;
 
+  @Column({ nullable: true })
+  proofNote: string;
+
   @ManyToOne(() => StationEntity)
   stationInCharge: StationEntity;
+
+  @ManyToOne(() => StationEntity)
+  previousStationInCharge: StationEntity;
 
   @ManyToOne(() => UserEntity)
   collectorInCharge: UserEntity;
 
   @ManyToOne(() => UserEntity)
   shipperInCharge: UserEntity;
+
+  @OneToOne(() => PhotoEntity)
+  @JoinColumn()
+  proof: PhotoEntity;
 
   @CreateDateColumn()
   createdAt: Date;

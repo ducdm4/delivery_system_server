@@ -138,6 +138,31 @@ export class StationsController {
     );
   }
 
+  @Get('sameLevel/:type')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  async getSameLevelStation(
+    @Param('type', ParseIntPipe) type: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.stationService.getStationWithSameType(type);
+    response.then(
+      (station) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: station,
+        });
+      },
+      (fail) => {
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Something went wrong',
+          data: {},
+        });
+      },
+    );
+  }
+
   @Delete(':id')
   @Roles([ROLE_LIST.ADMIN])
   deleteStationInfo(

@@ -15,7 +15,7 @@ export class ConfigEntity {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ type: 'text' })
   value: string;
 
   @CreateDateColumn()

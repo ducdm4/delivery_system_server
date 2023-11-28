@@ -21,7 +21,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   @Post('login')
   @UseGuards(AuthGuard('local'))
