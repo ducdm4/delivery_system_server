@@ -42,6 +42,10 @@ export class RouteEntity {
   @JoinTable()
   childStation: StationEntity[];
 
+  @ManyToMany(() => StationEntity, { cascade: true })
+  @JoinTable()
+  connectedStation: StationEntity[];
+
   @CreateDateColumn()
   createdAt: Date;
 

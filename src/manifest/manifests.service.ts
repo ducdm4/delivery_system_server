@@ -27,17 +27,7 @@ export class ManifestsService {
     const res = await this.manifestRepository.findOne({
       relations: {
         orderProcessed: true,
-        orders: {
-          pickupAddress: {
-            street: true,
-            ward: true,
-            district: true,
-            city: true,
-          },
-          parcels: {
-            photo: true,
-          },
-        },
+        orders: true,
       },
       where: {
         type,
@@ -47,15 +37,40 @@ export class ManifestsService {
         },
       },
     });
+
+    if (res?.orders.length) {
+      const resTracking = await this.ordersService.getOrdersAndStatus(
+        res.orders.map((item) => item.id),
+      );
+      return {
+        ...res,
+        orders: resTracking,
+      };
+    }
     return res;
   }
 
-  async createNewCollectorManifest(employeeId: number, type: number) {
+  async createNewCollectorManifest(
+    employeeId: number,
+    userId: number,
+    type: number,
+  ) {
+    const status =
+      type === MANIFEST_TYPE.PICKUP
+        ? [
+            ORDER_STATUS.WAITING_COLLECTOR_CONFIRM,
+            ORDER_STATUS.WAITING_COLLECTOR_TO_TRANSIT,
+          ]
+        : [
+            ORDER_STATUS.ORDER_READY_TO_SHIP,
+            ORDER_STATUS.ORDER_ON_THE_WAY_TO_RECEIVER,
+          ];
     const orderList = await this.ordersService.findOrderByEmployee(
-      employeeId,
+      userId,
       type,
-      ORDER_STATUS.WAITING_COLLECTOR_CONFIRM,
+      status,
     );
+
     const manifest = this.manifestRepository.create({
       employee: {
         id: employeeId,
@@ -66,26 +81,7 @@ export class ManifestsService {
     });
 
     await this.manifestRepository.save(manifest);
-    const returnManifest = await this.manifestRepository.findOne({
-      relations: {
-        orderProcessed: true,
-        orders: {
-          pickupAddress: {
-            street: true,
-            ward: true,
-            district: true,
-            city: true,
-          },
-          parcels: {
-            photo: true,
-          },
-        },
-      },
-      where: {
-        id: manifest.id,
-      },
-    });
 
-    return returnManifest;
+    return true;
   }
 }

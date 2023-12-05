@@ -26,11 +26,13 @@ export class ManifestsController {
   constructor(private readonly manifestsService: ManifestsService) {}
 
   @Get('/current')
-  @Roles([ROLE_LIST.COLLECTOR])
+  @Roles([ROLE_LIST.COLLECTOR, ROLE_LIST.SHIPPER])
   getEmployeeCurrentManifest(@Req() req: Request, @Res() res: Response) {
     const response = this.manifestsService.findEmployeeCurrentManifest(
       req.user['employeeInfo']['id'],
-      MANIFEST_TYPE.PICKUP,
+      req.user['role'] === ROLE_LIST.COLLECTOR
+        ? MANIFEST_TYPE.PICKUP
+        : MANIFEST_TYPE.DROP,
     );
     response.then(
       (data) => {
@@ -53,11 +55,14 @@ export class ManifestsController {
   }
 
   @Get('/new')
-  @Roles([ROLE_LIST.COLLECTOR])
+  @Roles([ROLE_LIST.COLLECTOR, ROLE_LIST.SHIPPER])
   getNewManifest(@Req() req: Request, @Res() res: Response) {
     const response = this.manifestsService.createNewCollectorManifest(
       req.user['employeeInfo']['id'],
-      MANIFEST_TYPE.PICKUP,
+      req.user['id'],
+      req.user['role'] === ROLE_LIST.COLLECTOR
+        ? MANIFEST_TYPE.PICKUP
+        : MANIFEST_TYPE.DROP,
     );
     response.then(
       (data) => {

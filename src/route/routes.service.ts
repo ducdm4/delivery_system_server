@@ -96,6 +96,7 @@ export class RoutesService {
         },
         station: true,
         childStation: true,
+        connectedStation: true,
       },
       where: {
         id,
@@ -143,7 +144,16 @@ export class RoutesService {
           stations.push(station);
         });
       }
+      const connectedStation = [];
+      if (data.connectedStation.length) {
+        data.connectedStation.forEach((stn) => {
+          const station = new StationEntity();
+          station.id = stn.id;
+          connectedStation.push(station);
+        });
+      }
       checkRoute.childStation = stations;
+      checkRoute.connectedStation = connectedStation;
       const res = await this.routeRepository.save(route);
       return res;
     }
@@ -157,10 +167,12 @@ export class RoutesService {
     }
   }
 
-  async getRouteByStreet(stationId: number, type: number, streetId) {
+  async getRouteByStreet(stationId: number, type: number, streetId: number) {
     const route = await this.routeRepository.findOne({
       relations: {
-        employee: true,
+        employee: {
+          user: true,
+        },
       },
       where: {
         station: {

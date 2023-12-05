@@ -355,4 +355,16 @@ export class StationsService {
     );
     return res;
   }
+
+  async getAllConnectedStations(id: number) {
+    const res = await this.stationRepository.findOne({
+      relations: {
+        stationConnected: true,
+      },
+      where: {
+        id,
+      },
+    });
+    return res.stationConnected;
+  }
 }

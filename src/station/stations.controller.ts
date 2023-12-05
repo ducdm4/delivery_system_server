@@ -27,7 +27,7 @@ export class StationsController {
   ) {}
 
   @Get()
-  @Roles([ROLE_LIST.ADMIN])
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
   findAllWithFilter(@Req() req: Request, @Res() res: Response) {
     const filterObject = getFilterObject(req);
     const stationList = this.stationService.getListStation(filterObject);
@@ -151,6 +151,33 @@ export class StationsController {
         res.status(HttpStatus.OK).json({
           statusCode: HttpStatus.OK,
           data: station,
+        });
+      },
+      (fail) => {
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Something went wrong',
+          data: {},
+        });
+      },
+    );
+  }
+
+  @Get('stationConnected/:id')
+  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  async getStationConnected(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.stationService.getAllConnectedStations(id);
+    response.then(
+      (stations) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: {
+            stations,
+          },
         });
       },
       (fail) => {

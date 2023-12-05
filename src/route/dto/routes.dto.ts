@@ -22,6 +22,9 @@ export class CreateRoutesDto {
 
   @Type(() => commonUpdateDto)
   childStation: Array<commonUpdateDto>;
+
+  @Type(() => commonUpdateDto)
+  connectedStation: Array<commonUpdateDto>;
 }
 
 export class UpdateRoutesDto extends CreateRoutesDto {

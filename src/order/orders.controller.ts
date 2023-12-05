@@ -186,7 +186,7 @@ export class OrdersController {
     const response = this.ordersService.cancelOrderByCollector(
       trackingId,
       collectorCancelOrderData,
-      req.user['employeeInfo']['id'],
+      req.user['id'],
     );
     response.then(
       (data) => {
@@ -219,7 +219,38 @@ export class OrdersController {
     const response = this.ordersService.confirmOrderByCollector(
       trackingId,
       collectorCancelOrderData,
-      req.user['employeeInfo']['id'],
+      req.user['id'],
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: {},
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
+  }
+
+  @Patch('/orderArrivedStation/:trackingId')
+  @Roles([ROLE_LIST.OPERATOR])
+  async orderArrivedStation(
+    @Param('trackingId', ParseIntPipe) trackingId: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.ordersService.confirmOrderArrivedStation(
+      trackingId,
+      req.user['employeeInfo']['station']['id'],
     );
     response.then(
       (data) => {
@@ -273,5 +304,102 @@ export class OrdersController {
     }
 
     return result;
+  }
+
+  @Patch('/shipperConfirmed/:trackingId')
+  @Roles([ROLE_LIST.SHIPPER])
+  async shipperAddedToBasket(
+    @Param('trackingId', ParseIntPipe) trackingId: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.ordersService.shipperAddedToBasket(
+      trackingId,
+      req.user['id'],
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: {},
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
+  }
+
+  @Patch('/shipperCancel/:trackingId')
+  @Roles([ROLE_LIST.SHIPPER])
+  async shipperCancelOrder(
+    @Param('trackingId', ParseIntPipe) trackingId: string,
+    @Body() shipperCancelOrderData: CollectorCancelOrderData,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.ordersService.cancelOrderByShipper(
+      trackingId,
+      shipperCancelOrderData,
+      req.user['id'],
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: {},
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
+  }
+
+  @Patch('/shipperShipped/:trackingId')
+  @Roles([ROLE_LIST.SHIPPER])
+  async shipperShippedOrder(
+    @Param('trackingId', ParseIntPipe) trackingId: string,
+    @Body() shipperShippedOrderData: CollectorCancelOrderData,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.ordersService.cancelOrderByShipper(
+      trackingId,
+      shipperShippedOrderData,
+      req.user['id'],
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: {},
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
   }
 }
