@@ -184,6 +184,55 @@ export class RoutesService {
         },
       },
     });
+
+    return route;
+  }
+
+  async getRouteRelativeStation(
+    stationId: number,
+    type: number,
+    stationRelate: number,
+  ) {
+    const route = await this.routeRepository.findOne({
+      relations: {
+        employee: {
+          user: true,
+        },
+        station: {
+          parentStation: true,
+        },
+      },
+      where: [
+        {
+          station: {
+            id: stationId,
+          },
+          type,
+          childStation: {
+            id: stationRelate,
+          },
+        },
+        {
+          station: {
+            id: stationId,
+          },
+          type,
+          connectedStation: {
+            id: stationRelate,
+          },
+        },
+        {
+          station: {
+            id: stationId,
+            parentStation: {
+              id: stationRelate,
+            },
+          },
+          type,
+          isGoToParent: true,
+        },
+      ],
+    });
     return route;
   }
 }

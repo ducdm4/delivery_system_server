@@ -514,7 +514,6 @@ export class OrdersService {
     const routine = orderTracking.order.stationRoutine.split(',');
     const newOrderTracking = this.orderTrackingRepository.create();
     newOrderTracking.order = orderTracking.order;
-
     if (parseInt(routine[routine.length - 1]) === stationId) {
       newOrderTracking.status = ORDER_STATUS.ORDER_READY_TO_SHIP;
       newOrderTracking.stationInCharge = orderTracking.stationInCharge;
@@ -530,10 +529,11 @@ export class OrdersService {
       newOrderTracking.stationInCharge = this.stationRepository.create({
         id: parseInt(routine[indexStation + 1]),
       });
-      const route = await this.routeService.getRouteByStreet(
+
+      const route = await this.routeService.getRouteRelativeStation(
         parseInt(routine[indexStation + 1]),
-        MANIFEST_TYPE.DROP,
-        orderTracking.order.dropOffAddress.street.id,
+        MANIFEST_TYPE.PICKUP,
+        orderTracking.stationInCharge.id,
       );
       newOrderTracking.collectorInCharge = route.employee.user;
       newOrderTracking.previousStationInCharge = orderTracking.stationInCharge;

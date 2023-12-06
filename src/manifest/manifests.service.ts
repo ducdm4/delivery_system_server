@@ -1,11 +1,5 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { In, Not, Repository } from 'typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { ManifestEntity } from '../typeorm/entities/manifest.entity';
 import { OrderEntity } from '../typeorm/entities/order.entity';
 import { EmployeesService } from 'src/employee/employees.service';
@@ -79,6 +73,8 @@ export class ManifestsService {
       type,
       orders: orderList,
     });
+
+    console.log('orderList', orderList);
 
     await this.manifestRepository.save(manifest);
 

@@ -378,7 +378,7 @@ export class OrdersController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const response = this.ordersService.cancelOrderByShipper(
+    const response = this.ordersService.shippedOrderByShipper(
       trackingId,
       shipperShippedOrderData,
       req.user['id'],
