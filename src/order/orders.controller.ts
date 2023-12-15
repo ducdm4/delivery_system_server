@@ -402,4 +402,31 @@ export class OrdersController {
       },
     );
   }
+
+  @Get('/tracking/:id')
+  async getTrackingForOrder(
+    @Param('id') id: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const trackingList = this.ordersService.getAllTrackingOfOrder(id);
+    trackingList.then(
+      (trackings) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: { trackings },
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not found',
+            data: {},
+          });
+      },
+    );
+  }
 }

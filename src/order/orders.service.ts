@@ -565,6 +565,14 @@ export class OrdersService {
             photo: true,
           },
         },
+        previousStationInCharge: {
+          address: {
+            street: true,
+            ward: true,
+            district: true,
+            city: true,
+          },
+        },
       },
       where: {
         id: In(trackingList.map((item) => item.mId)),
@@ -585,8 +593,10 @@ export class OrdersService {
       throw new ForbiddenException('Order not found');
     }
 
+    const newTrackingObj = orderTracking;
+    delete newTrackingObj.id;
     const newTracking = this.orderTrackingRepository.create({
-      ...orderTracking,
+      ...newTrackingObj,
       status: ORDER_STATUS.ORDER_ON_THE_WAY_TO_RECEIVER,
     });
 
@@ -695,5 +705,46 @@ export class OrdersService {
     }
 
     return manifest;
+  }
+
+  async getAllTrackingOfOrder(uniqueTrackingId: string) {
+    const statusArr = [
+      ORDER_STATUS.ORDER_CREATED,
+      ORDER_STATUS.COLLECTOR_ON_THE_WAY_TO_STATION,
+      ORDER_STATUS.WAITING_COLLECTOR_TO_TRANSIT,
+      ORDER_STATUS.ORDER_HAS_BEEN_SHIPPED,
+      ORDER_STATUS.ORDER_ON_THE_WAY_TO_RECEIVER,
+      ORDER_STATUS.ORDER_READY_TO_SHIP,
+    ];
+    const res = await this.orderTrackingRepository.find({
+      select: {
+        status: true,
+        createdAt: true,
+        stationInCharge: {
+          name: true,
+        },
+        previousStationInCharge: {
+          name: true,
+        },
+        order: {
+          uniqueTrackingId: true,
+          receiverEmail: true,
+          receiverName: true,
+        },
+      },
+      relations: {
+        stationInCharge: true,
+        previousStationInCharge: true,
+        order: true,
+      },
+      where: {
+        order: {
+          uniqueTrackingId,
+        },
+        status: In(statusArr),
+      },
+    });
+
+    return res;
   }
 }

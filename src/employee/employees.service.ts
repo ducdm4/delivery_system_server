@@ -167,4 +167,30 @@ export class EmployeesService {
     });
     return employeeList;
   }
+
+  async getEmployeeVerify(userId: number) {
+    const res = await this.employeeRepository.findOne({
+      relations: {
+        user: {
+          profilePicture: true,
+        },
+        station: true,
+      },
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
+    const dataEmployee = Object.assign({}, res);
+    delete dataEmployee.user;
+
+    const data = {
+      ...res.user,
+      employeeInfo: {
+        ...dataEmployee,
+      },
+    };
+    return data;
+  }
 }

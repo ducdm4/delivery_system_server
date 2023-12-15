@@ -14,12 +14,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { UsersService } from 'src/user/users.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
+    private userService: UsersService,
     private jwtService: JwtService,
   ) {}
 
@@ -50,11 +52,22 @@ export class AuthController {
 
   @Post('verify')
   @UseGuards(AuthGuard('jwt'))
-  verifyUser(@Req() req: Request, @Res() res: Response) {
+  async verifyUser(@Req() req: Request, @Res() res: Response) {
     const user: Express.User = req.user;
-    res.status(HttpStatus.OK).json({
-      statusCode: HttpStatus.OK,
-      data: user,
-    });
+    if (user) {
+      const response = await this.userService.getUserVerified(
+        user['id'],
+        user['role'],
+      );
+      res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        data: response,
+      });
+    } else {
+      res.status(HttpStatus.UNAUTHORIZED).json({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        data: {},
+      });
+    }
   }
 }

@@ -1,24 +1,7 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Req,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ManifestsService } from './manifests.service';
-import {
-  GENERAL_CONFIG,
-  MANIFEST_TYPE,
-  ROLE_LIST,
-  STATION_TYPE,
-} from '../common/constant';
+import { MANIFEST_TYPE, ROLE_LIST } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
 
 @Controller('manifests')

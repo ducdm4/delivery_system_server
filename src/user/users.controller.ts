@@ -115,25 +115,37 @@ export class UsersController {
   }
 
   @Put('self')
-  @Roles([ROLE_LIST.ADMIN, ROLE_LIST.OPERATOR])
+  @Roles([
+    ROLE_LIST.ADMIN,
+    ROLE_LIST.OPERATOR,
+    ROLE_LIST.COLLECTOR,
+    ROLE_LIST.SHIPPER,
+  ])
   async updateSelfInfo(
     @Body() updateUserPayloadDto: UpdateUserPayloadDto,
     @Res() res: Response,
+    @Req() req: Request,
   ) {
     let addressInfo;
-    if (updateUserPayloadDto.address.id) {
-      addressInfo = await this.addressService.updateAddressInfo(
-        updateUserPayloadDto.address,
-        updateUserPayloadDto.address.id,
-      );
-    } else {
-      addressInfo = await this.addressService.createAddress(
-        updateUserPayloadDto.address,
-      );
-    }
     const updateUserDto = updateUserPayloadDto;
-    updateUserDto.address = addressInfo.id;
-    const userInfo = await this.userService.updateSelfInfo(updateUserDto);
+    if (updateUserPayloadDto.address) {
+      if (updateUserPayloadDto.address.id) {
+        addressInfo = await this.addressService.updateAddressInfo(
+          updateUserPayloadDto.address,
+          updateUserPayloadDto.address.id,
+        );
+      } else {
+        addressInfo = await this.addressService.createAddress(
+          updateUserPayloadDto.address,
+        );
+      }
+      updateUserDto.address = addressInfo.id;
+    }
+
+    const userInfo = await this.userService.updateSelfInfo(
+      updateUserDto,
+      req.user['id'],
+    );
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       data: {

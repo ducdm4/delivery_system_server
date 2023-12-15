@@ -65,19 +65,18 @@ export class ManifestsService {
       status,
     );
 
-    const manifest = this.manifestRepository.create({
-      employee: {
-        id: employeeId,
-      },
-      isComplete: false,
-      type,
-      orders: orderList,
-    });
+    if (orderList.length) {
+      const manifest = this.manifestRepository.create({
+        employee: {
+          id: employeeId,
+        },
+        isComplete: false,
+        type,
+        orders: orderList,
+      });
+      await this.manifestRepository.save(manifest);
+    }
 
-    console.log('orderList', orderList);
-
-    await this.manifestRepository.save(manifest);
-
-    return true;
+    return orderList.length;
   }
 }

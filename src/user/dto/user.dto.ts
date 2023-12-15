@@ -38,8 +38,15 @@ export class UpdateUserDto {
   address: UpdateAddressDto;
 }
 
-export class UpdateUserPayloadDto extends UpdateUserDto {
+export class UpdateUserPayloadDto {
   address: UpdateAddressDto;
+  firstName: string;
+  role: number;
+  lastName: string;
+  phone: string;
+  dob: string;
+  profilePictureId: number;
+  addressId: number;
 }
 
 export class ChangePasswordDto {

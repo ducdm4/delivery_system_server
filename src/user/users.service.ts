@@ -5,9 +5,12 @@ import {
   UpdateUserDto,
   CreateUserDto,
   ChangePasswordDto,
+  UpdateUserPayloadDto,
 } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
 import { MailService } from '../mail/mail.service';
+import { EmployeesService } from 'src/employee/employees.service';
+import { ROLE_LIST } from 'src/common/constant';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +18,7 @@ export class UsersService {
     @Inject('USER_REPOSITORY')
     private userRepository: Repository<UserEntity>,
     private mailService: MailService,
+    private employeeService: EmployeesService,
   ) {}
   getUser() {
     return this.userRepository.find();
@@ -71,11 +75,10 @@ export class UsersService {
     return await this.userRepository.update({ id }, { ...updateUserDetails });
   }
 
-  async updateSelfInfo(updateUserDetails: UpdateUserDto) {
-    const result = await this.userRepository.update(
-      { id: updateUserDetails.id },
-      updateUserDetails,
-    );
+  async updateSelfInfo(updateUserDetails: UpdateUserPayloadDto, id: number) {
+    const data = updateUserDetails;
+    if (data.role) delete data.role;
+    const result = await this.userRepository.update({ id }, data);
     return result;
   }
 
@@ -135,5 +138,22 @@ export class UsersService {
       },
     });
     return userLoggedInfo;
+  }
+
+  async getUserVerified(id: number, role: number) {
+    if (role !== ROLE_LIST.ADMIN) {
+      const employee = await this.employeeService.getEmployeeVerify(id);
+      return employee;
+    }
+    const userRes = await this.userRepository.findOne({
+      where: {
+        id,
+      },
+    });
+    const data = {
+      ...userRes,
+      employee: null,
+    };
+    return data;
   }
 }
