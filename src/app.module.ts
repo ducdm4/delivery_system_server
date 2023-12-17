@@ -34,6 +34,7 @@ import { DatabaseModule } from './database/database.module';
 import { MailModule } from './mail/mail.module';
 import { ParcelsModule } from './parcel/parcels.module';
 import { ManifestsModule } from './manifest/manifests.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ManifestsModule } from './manifest/manifests.module';
     OrdersModule,
     ConfigsModule,
     ManifestsModule,
+    EventsModule,
   ],
   providers: [
     {
