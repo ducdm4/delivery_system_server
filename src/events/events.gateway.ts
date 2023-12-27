@@ -100,10 +100,45 @@ export class EventsGateway {
     }
   }
 
+  @SubscribeMessage('userReJoinChat')
+  async userReJoinChat(@MessageBody() data: KeyValue): Promise<boolean> {
+    const sockets = await this.server.fetchSockets();
+    for (const socket of sockets) {
+      if (socket.id === data.instanceId) {
+        this.server.to(data.roomName).emit('newClientInstanceJoined', {
+          instanceId: data.instanceId,
+        });
+        socket.join(data.roomName);
+      }
+    }
+
+    return true;
+  }
+
   @SubscribeMessage('sendNewMessage')
   async sendNewMessage(@MessageBody() data: KeyValue): Promise<boolean> {
     try {
       this.server.to(data.roomName).emit('newMessageReceived', data);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @SubscribeMessage('customerExitChat')
+  async customerExitChat(@MessageBody() data: KeyValue): Promise<boolean> {
+    try {
+      const sockets = await this.server.fetchSockets();
+      for (const socket of sockets) {
+        if (socket.id === data.instanceId) {
+          socket.leave(data.roomName);
+        }
+      }
+
+      this.server.to(data.roomName).emit('clientLeaveRoom', {
+        roomName: data.roomName,
+      });
+
       return true;
     } catch (e) {
       return false;

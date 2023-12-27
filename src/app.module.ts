@@ -35,9 +35,14 @@ import { MailModule } from './mail/mail.module';
 import { ParcelsModule } from './parcel/parcels.module';
 import { ManifestsModule } from './manifest/manifests.module';
 import { EventsModule } from './events/events.module';
+import { TasksModule } from './scheduleTask/scheduleTasks.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -59,6 +64,7 @@ import { EventsModule } from './events/events.module';
     ConfigsModule,
     ManifestsModule,
     EventsModule,
+    TasksModule,
   ],
   providers: [
     {

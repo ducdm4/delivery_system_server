@@ -15,9 +15,11 @@ import { WardProviders } from '../typeorm/providers/ward.providers';
 import { StationProviders } from '../typeorm/providers/station.providers';
 import { RouteProviders } from '../typeorm/providers/route.providers';
 import { EmployeeProviders } from '../typeorm/providers/employee.providers';
+import { NotificationProviders } from '../typeorm/providers/notification.providers';
 import { ConfigProviders } from '../typeorm/providers/config.providers';
 import { MailService } from '../mail/mail.service';
 import { ConfigsService } from '../config/configs.service';
+import { NotificationsService } from '../notification/notifications.service';
 
 @Module({
   imports: [DatabaseModule],
@@ -33,6 +35,7 @@ import { ConfigsService } from '../config/configs.service';
     ...EmployeeProviders,
     ...ManifestProviders,
     ...ConfigProviders,
+    ...NotificationProviders,
     OrdersService,
     WardsService,
     MailService,
@@ -40,6 +43,7 @@ import { ConfigsService } from '../config/configs.service';
     RoutesService,
     EmployeesService,
     ConfigsService,
+    NotificationsService,
   ],
   exports: [OrdersService],
 })

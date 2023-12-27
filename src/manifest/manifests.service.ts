@@ -5,6 +5,7 @@ import { OrderEntity } from '../typeorm/entities/order.entity';
 import { EmployeesService } from 'src/employee/employees.service';
 import { MANIFEST_TYPE, ORDER_STATUS } from 'src/common/constant';
 import { OrdersService } from 'src/order/orders.service';
+import { NotificationsService } from 'src/notification/notifications.service';
 
 @Injectable()
 export class ManifestsService {
@@ -15,6 +16,7 @@ export class ManifestsService {
     private orderRepository: Repository<OrderEntity>,
     private employeeService: EmployeesService,
     private ordersService: OrdersService,
+    private notificationService: NotificationsService,
   ) {}
 
   async findEmployeeCurrentManifest(employeeId: number, type: number) {
@@ -75,6 +77,19 @@ export class ManifestsService {
         orders: orderList,
       });
       await this.manifestRepository.save(manifest);
+      const listToSendNotification =
+        await this.ordersService.getOrderInfoListForNotification(
+          orderList.map((item) => item.id as number),
+        );
+      for (let i = 0; i++; i < listToSendNotification.length) {
+        this.notificationService.sendPushNotificationForOrder(
+          listToSendNotification[i].notificationToken,
+          {
+            title: 'Collector on the way',
+            body: `Our collector is on the way to pickup your delivery ${listToSendNotification[i].uniqueTrackingId} today. Please notice your phone!`,
+          },
+        );
+      }
     }
 
     return orderList.length;

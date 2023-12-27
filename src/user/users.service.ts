@@ -156,4 +156,10 @@ export class UsersService {
     };
     return data;
   }
+
+  async updateNotificationToken(id: number, token: string) {
+    const user = await this.userRepository.findOneBy({ id });
+    user.notificationToken = token;
+    return await this.userRepository.save(user);
+  }
 }

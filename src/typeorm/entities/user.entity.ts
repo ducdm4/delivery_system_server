@@ -50,6 +50,9 @@ export class UserEntity {
   @JoinColumn({ name: 'addressId', referencedColumnName: 'id' })
   address: AddressEntity;
 
+  @Column({ default: null })
+  notificationToken: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

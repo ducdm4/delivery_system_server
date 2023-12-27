@@ -10,6 +10,7 @@ import {
   Post,
   Req,
   Res,
+  Sse,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OrdersService } from './orders.service';
@@ -21,12 +22,18 @@ import {
 } from './dto/order.dto';
 import { GENERAL_CONFIG, ROLE_LIST, STATION_TYPE } from '../common/constant';
 import { Roles } from '../common/decorator/roles.decorator';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Observable, fromEvent } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { MailService } from 'src/mail/mail.service';
 
 @Controller('orders')
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
     private readonly stationsService: StationsService,
+    private eventEmitter: EventEmitter2,
+    private mailService: MailService,
   ) {}
 
   @Post()
@@ -40,6 +47,7 @@ export class OrdersController {
       createOrderData.pickupAddress.ward.id,
     );
     response.then((orderInfo) => {
+      this.eventEmitter.emit('new-order', { station: stationPickup.id });
       res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         data: { orderInfo, stationPickup },
@@ -427,6 +435,68 @@ export class OrdersController {
             data: {},
           });
       },
+    );
+  }
+
+  @Patch('/customerRequestCancel/:trackingId')
+  async customerRequestCancel(
+    @Param('trackingId') trackingId: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const OTP = await this.ordersService.sendOTPCancel(trackingId);
+    if (OTP) {
+      await this.mailService.sendEmailOTPCancelOrder(OTP, trackingId);
+      res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        data: {},
+      });
+    } else {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Can not cancel order',
+        data: {},
+      });
+    }
+  }
+
+  @Patch('/customerConfirmCancel/:trackingId')
+  async customerConfirmCancel(
+    @Param('trackingId') trackingId: string,
+    @Body() data: { otp: string },
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const response = this.ordersService.customerConfirmCancel(
+      trackingId,
+      data.otp,
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data,
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Order not cancelable',
+            data: {},
+          });
+      },
+    );
+  }
+
+  @Sse('sse')
+  sse(): Observable<MessageEvent> {
+    return fromEvent(this.eventEmitter, 'new-order').pipe(
+      map((data) => {
+        return new MessageEvent('new-order', { data });
+      }),
     );
   }
 }

@@ -11,7 +11,7 @@ import {
 import { UserEntity } from './user.entity';
 
 @Entity({ name: 'notifications' })
-export class RouteEntity {
+export class NotificationEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

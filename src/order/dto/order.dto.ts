@@ -73,6 +73,8 @@ export class BasicOrderInfo {
 
   @IsNumber()
   shippingFare: number;
+
+  notificationToken: string;
 }
 
 export class OrderInfoQuote {

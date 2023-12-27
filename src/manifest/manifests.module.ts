@@ -17,7 +17,9 @@ import { WardsService } from '../ward/wards.service';
 import { StationsService } from '../station/stations.service';
 import { RoutesService } from '../route/routes.service';
 import { ConfigsService } from '../config/configs.service';
+import { NotificationsService } from '../notification/notifications.service';
 import { ConfigProviders } from '../typeorm/providers/config.providers';
+import { NotificationProviders } from '../typeorm/providers/notification.providers';
 
 @Module({
   imports: [DatabaseModule],
@@ -33,6 +35,7 @@ import { ConfigProviders } from '../typeorm/providers/config.providers';
     ...RouteProviders,
     ...StationProviders,
     ...ConfigProviders,
+    ...NotificationProviders,
     OrdersService,
     ManifestsService,
     EmployeesService,
@@ -41,6 +44,7 @@ import { ConfigProviders } from '../typeorm/providers/config.providers';
     RoutesService,
     WardsService,
     ConfigsService,
+    NotificationsService,
   ],
   exports: [ManifestsService],
 })

@@ -79,6 +79,12 @@ export class OrderEntity {
   @Column()
   isCancelNote: string;
 
+  @Column({ default: null })
+  notificationToken: string;
+
+  @Column({ default: null })
+  cancelOTP: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -37,4 +37,18 @@ export class MailService {
       },
     });
   }
+
+  async sendEmailOTPCancelOrder(OTP: number, trackingId: string) {
+    await this.mailerService.sendMail({
+      to: 'ducdm03016.dev@gmail.com',
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: `Order ${trackingId} cancel OTP`,
+      template: './sendOTPCancelOrder', // `.hbs` extension is appended automatically
+      context: {
+        // ✏️ filling curly brackets with content
+        otp: OTP,
+        trackingId,
+      },
+    });
+  }
 }

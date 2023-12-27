@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { OrderEntity } from '../typeorm/entities/order.entity';
 import { BasicOrderInfo, CollectorCancelOrderData } from './dto/order.dto';
 import { AddressEntity } from '../typeorm/entities/address.entity';
@@ -29,6 +29,7 @@ import { ManifestEntity } from 'src/typeorm/entities/manifest.entity';
 import { Graph } from 'src/common/function/shortestPath';
 import { ConfigsService } from 'src/config/configs.service';
 import { StationEntity } from 'src/typeorm/entities/station.entity';
+import { NotificationsService } from 'src/notification/notifications.service';
 
 @Injectable()
 export class OrdersService {
@@ -50,6 +51,7 @@ export class OrdersService {
     private routeService: RoutesService,
     private employeeService: EmployeesService,
     private configService: ConfigsService,
+    private notificationService: NotificationsService,
   ) {}
 
   async createOrder(orderData: BasicOrderInfo) {
@@ -288,6 +290,13 @@ export class OrdersService {
       },
     });
 
+    this.notificationService.sendPushNotificationForOrder(
+      orderInfo.notificationToken,
+      {
+        title: 'Your delivery confirmed',
+        body: `Your delivery ${orderInfo.uniqueTrackingId} has been confirmed and waiting to pickup`,
+      },
+    );
     this.orderTrackingRepository.save(newOrderTracking);
 
     return true;
@@ -306,6 +315,13 @@ export class OrdersService {
     order.isCancel = true;
     order.isCancelNote = note;
     this.orderRepository.save(order);
+    this.notificationService.sendPushNotificationForOrder(
+      order.notificationToken,
+      {
+        title: 'Your delivery cancelled',
+        body: `Your delivery ${order.uniqueTrackingId} has been cancelled by operator. Reason ${note}`,
+      },
+    );
 
     return order;
   }
@@ -378,6 +394,15 @@ export class OrdersService {
       await queryRunner.manager.save(manifest);
 
       await queryRunner.commitTransaction();
+      if (order.notificationToken) {
+        this.notificationService.sendPushNotificationForOrder(
+          order.notificationToken,
+          {
+            title: 'Your delivery has been cancelled',
+            body: `Your delivery ${order.uniqueTrackingId} has been cancelled by our collector. Reason: ${data.proofNote}`,
+          },
+        );
+      }
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException('Something went wrong');
@@ -514,6 +539,10 @@ export class OrdersService {
     const routine = orderTracking.order.stationRoutine.split(',');
     const newOrderTracking = this.orderTrackingRepository.create();
     newOrderTracking.order = orderTracking.order;
+    let notification = {
+      title: '',
+      body: '',
+    };
     if (parseInt(routine[routine.length - 1]) === stationId) {
       newOrderTracking.status = ORDER_STATUS.ORDER_READY_TO_SHIP;
       newOrderTracking.stationInCharge = orderTracking.stationInCharge;
@@ -523,6 +552,10 @@ export class OrdersService {
         orderTracking.order.dropOffAddress.street.id,
       );
       newOrderTracking.shipperInCharge = route.employee.user;
+      notification = {
+        title: 'Your delivery is ready',
+        body: `Your delivery ${uniqueTrackingId} is ready to be shipped`,
+      };
     } else {
       newOrderTracking.status = ORDER_STATUS.WAITING_COLLECTOR_TO_TRANSIT;
       const indexStation = routine.findIndex((x) => parseInt(x) === stationId);
@@ -537,6 +570,17 @@ export class OrdersService {
       );
       newOrderTracking.collectorInCharge = route.employee.user;
       newOrderTracking.previousStationInCharge = orderTracking.stationInCharge;
+      notification = {
+        title: 'Your delivery has arrived station',
+        body: `Your delivery ${uniqueTrackingId} has arrived ${orderTracking.stationInCharge.name}`,
+      };
+    }
+
+    if (orderTracking.order.notificationToken) {
+      this.notificationService.sendPushNotificationForOrder(
+        orderTracking.order.notificationToken,
+        notification,
+      );
     }
 
     return await this.orderTrackingRepository.save(newOrderTracking);
@@ -599,6 +643,16 @@ export class OrdersService {
       ...newTrackingObj,
       status: ORDER_STATUS.ORDER_ON_THE_WAY_TO_RECEIVER,
     });
+
+    if (orderTracking.order.notificationToken) {
+      this.notificationService.sendPushNotificationForOrder(
+        orderTracking.order.notificationToken,
+        {
+          title: 'Your order is on the way',
+          body: `Your order ${uniqueTrackingId} is on the way to recipient`,
+        },
+      );
+    }
 
     return await this.orderTrackingRepository.save(newTracking);
   }
@@ -730,6 +784,9 @@ export class OrdersService {
           uniqueTrackingId: true,
           receiverEmail: true,
           receiverName: true,
+          isCancel: true,
+          isCancelNote: true,
+          updatedAt: true,
         },
       },
       relations: {
@@ -746,5 +803,68 @@ export class OrdersService {
     });
 
     return res;
+  }
+
+  async sendOTPCancel(trackingId: string) {
+    const order = await this.orderRepository.findOneBy({
+      uniqueTrackingId: trackingId,
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    const newestTrackingId = await this.queryToGetNewestTrackingIdOfEveryOrder([
+      order.id,
+    ]).getRawMany();
+    const tracking = await this.orderTrackingRepository.findOneBy({
+      id: newestTrackingId[0].mId,
+    });
+    if (tracking.status === ORDER_STATUS.ORDER_CREATED) {
+      const OTP = Math.floor(Math.random() * 1000000);
+      order.cancelOTP = `${OTP}`;
+      this.orderRepository.save(order);
+      return OTP;
+    } else {
+      throw new BadRequestException('Order not cancelable');
+    }
+  }
+
+  async customerConfirmCancel(trackingId: string, otp: string) {
+    const order = await this.orderRepository.findOneBy({
+      uniqueTrackingId: trackingId,
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    const newestTrackingId = await this.queryToGetNewestTrackingIdOfEveryOrder([
+      order.id,
+    ]).getRawMany();
+    const tracking = await this.orderTrackingRepository.findOneBy({
+      id: newestTrackingId[0].mId,
+    });
+    if (tracking.status === ORDER_STATUS.ORDER_CREATED) {
+      if (order.cancelOTP !== otp.toString()) {
+        throw new BadRequestException('Order not cancelable');
+      }
+      order.isCancel = true;
+      order.isCancelNote = 'CUSTOMER CANCEL ORDER';
+      this.orderRepository.save(order);
+      return true;
+    } else {
+      throw new BadRequestException('Order not cancelable');
+    }
+  }
+
+  async getOrderInfoListForNotification(ids: number[]) {
+    const response = await this.orderRepository.find({
+      select: {
+        uniqueTrackingId: true,
+        notificationToken: true,
+      },
+      where: {
+        id: In(ids),
+        notificationToken: Not(null),
+      },
+    });
+    return response;
   }
 }

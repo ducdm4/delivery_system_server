@@ -10,13 +10,13 @@ import {
   Put,
   Req,
   Res,
+  Sse,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
   CreateUserDto,
   UpdateUserPayloadDto,
-  UpdateUserDto,
   ChangePasswordDto,
 } from './dto/user.dto';
 import { Response, Request } from 'express';
@@ -152,5 +152,36 @@ export class UsersController {
         userInfo,
       },
     });
+  }
+
+  @Put('notification')
+  @Roles([ROLE_LIST.COLLECTOR, ROLE_LIST.SHIPPER])
+  async updateNotificationToken(
+    @Body() data: { token: string },
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    const response = this.userService.updateNotificationToken(
+      req.user['id'],
+      data.token,
+    );
+    response.then(
+      (data) => {
+        res.status(HttpStatus.OK).json({
+          statusCode: HttpStatus.OK,
+          data: data,
+        });
+      },
+      (fail) => {
+        res
+          .status(fail.getStatus === 'function' ? fail.getStatus() : 500)
+          .json({
+            statusCode:
+              typeof fail.getStatus === 'function' ? fail.getStatus() : 500,
+            message: 'Something went wrong',
+            data: {},
+          });
+      },
+    );
   }
 }
