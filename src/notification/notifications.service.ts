@@ -34,14 +34,14 @@ export class NotificationsService {
   }
 
   async sendPushNotificationForEmployee(
-    tokens: string[],
+    token: string,
     notification: { title: string; body: string },
   ) {
     await firebaseAdmin
       .messaging()
-      .sendEachForMulticast({
+      .send({
         notification,
-        tokens,
+        token,
       })
       .catch((error: any) => {
         console.error(error);

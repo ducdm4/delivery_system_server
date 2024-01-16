@@ -10,6 +10,8 @@ import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
 import { KeyValue } from 'src/common/constant';
 
+const SHIPPER_WAITING_CALL_ROOM = 'shipperWaitingCall';
+
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -139,6 +141,78 @@ export class EventsGateway {
         roomName: data.roomName,
       });
 
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @SubscribeMessage('shipperWaitingCall')
+  async shipperWaitingCall(@MessageBody() data: KeyValue): Promise<boolean> {
+    try {
+      const sockets = await this.server.fetchSockets();
+      for (const socket of sockets) {
+        if (socket.id === data.instanceId) {
+          socket.join(SHIPPER_WAITING_CALL_ROOM);
+        }
+      }
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @SubscribeMessage('customerRequestCallShipper')
+  async customerRequestCallShipper(
+    @MessageBody() data: KeyValue,
+  ): Promise<boolean> {
+    try {
+      const roomName = `call_${data.trackingId}`;
+      const sockets = await this.server.fetchSockets();
+      for (const socket of sockets) {
+        if (socket.id === data.instanceId) {
+          socket.join(roomName);
+        }
+      }
+      const currentSocketInRoom = await this.server
+        .in(SHIPPER_WAITING_CALL_ROOM)
+        .fetchSockets();
+      if (currentSocketInRoom.length === 0) return false;
+      console.log('count shipper waiting', currentSocketInRoom.length);
+      console.log('data', data);
+      this.server.to(SHIPPER_WAITING_CALL_ROOM).emit('customerRequestCall', {
+        instanceId: data.instanceId,
+        trackingId: data.trackingId,
+        roomName,
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @SubscribeMessage('shipperWantJoinCall')
+  async shipperWantJoinCall(@MessageBody() data: KeyValue): Promise<boolean> {
+    try {
+      console.log('shipperWantJoinCall');
+      const currentSocketInRoom = await this.server
+        .in(data.roomName)
+        .fetchSockets();
+      if (currentSocketInRoom.length >= 2) {
+        return false;
+      }
+
+      console.log('currentSocketInRoom.length', currentSocketInRoom.length);
+      for (const socket of currentSocketInRoom) {
+        if (socket.id !== data.instanceId) {
+          // socket.emit();
+          socket.emit('shipperCanJoinCall', {
+            peerId: data.peerId,
+          });
+        }
+      }
       return true;
     } catch (e) {
       return false;

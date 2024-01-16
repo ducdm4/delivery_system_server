@@ -731,6 +731,7 @@ export class OrdersService {
     }
 
     let manifest;
+    let token;
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -746,6 +747,7 @@ export class OrdersService {
       newTracking.status = ORDER_STATUS.ORDER_HAS_BEEN_SHIPPED;
 
       manifest = await this.prepareManifest(data.manifestId, order);
+      if (order.notificationToken) token = order.notificationToken;
 
       await queryRunner.manager.save(newTracking);
       await queryRunner.manager.save(manifest);
@@ -756,6 +758,16 @@ export class OrdersService {
       throw new InternalServerErrorException('Something went wrong');
     } finally {
       await queryRunner.release();
+    }
+
+    if (token) {
+      this.notificationService.sendPushNotificationForOrder(
+        orderTracking.order.notificationToken,
+        {
+          title: 'Your order has been shipped',
+          body: `Your order ${uniqueTrackingId} is delivered. Thanks for using our service!`,
+        },
+      );
     }
 
     return manifest;

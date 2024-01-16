@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { UserEntity } from '../typeorm/entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import {
   UpdateUserDto,
   CreateUserDto,
@@ -161,5 +161,21 @@ export class UsersService {
     const user = await this.userRepository.findOneBy({ id });
     user.notificationToken = token;
     return await this.userRepository.save(user);
+  }
+
+  async getListEmployeeHasToken() {
+    const res = await this.userRepository.find({
+      select: {
+        notificationToken: true,
+        firstName: true,
+        lastName: true,
+      },
+      where: {
+        role: In([ROLE_LIST.COLLECTOR, ROLE_LIST.SHIPPER]),
+        notificationToken: Not(''),
+        deletedAt: null,
+      },
+    });
+    return res;
   }
 }
